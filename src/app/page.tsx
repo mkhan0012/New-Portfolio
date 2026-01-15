@@ -13,6 +13,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Matter from "matter-js"; 
 import { RoughNotation, RoughNotationGroup } from "react-rough-notation";
 import confetti from "canvas-confetti";
+import Tilt from "react-parallax-tilt";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -22,7 +23,6 @@ const inter = Inter({ subsets: ["latin"] });
 const manrope = Manrope({ subsets: ["latin"] });
 const mono = JetBrains_Mono({ subsets: ["latin"] });
 
-// --- THEME CONFIG ---
 const THEMES = {
   morning: { 
     name: "Sunrise",
@@ -30,7 +30,7 @@ const THEMES = {
     text: "text-orange-500",
     hover: "hover:bg-orange-400",
     border: "hover:border-orange-500",
-    rough: "#f97316" // Orange
+    rough: "#f97316" 
   },
   afternoon: { 
     name: "Industrial",
@@ -38,7 +38,7 @@ const THEMES = {
     text: "text-lime-600",
     hover: "hover:bg-lime-400",
     border: "hover:border-lime-400",
-    rough: "#a3e635" // Lime
+    rough: "#a3e635" 
   },
   night: { 
     name: "Cyber",
@@ -46,22 +46,37 @@ const THEMES = {
     text: "text-violet-500",
     hover: "hover:bg-violet-500",
     border: "hover:border-violet-500",
-    rough: "#8b5cf6" // Violet
+    rough: "#8b5cf6" 
   }
 };
 
 const PROJECTS = [
-  { id: "01", title: "CryptoPlace", category: "Fintech", desc: "Real-time asset tracking.", link: "https://crypto-place-brown.vercel.app/", color: "bg-blue-600", img: "/crypto-preview.png", tags: ["Next.js", "WebSockets"] },
-  { id: "02", title: "TruthIs", category: "Art", desc: "WebGL subjective reality.", link: "https://truthis-optional.vercel.app/", color: "bg-purple-600", img: "/truth.png", tags: ["Three.js", "GLSL"] },
-  { id: "03", title: "Arguely", category: "Social", desc: "Graph theory debates.", link: "https://debate-again.vercel.app/", color: "bg-emerald-600", img: "/Arguely.png", tags: ["Neo4j", "Next.js"] },
-  { id: "04", title: "FocusBits", category: "Productivity", desc: "Binaural flow generator.", link: "https://timer-rho-khaki.vercel.app/", color: "bg-orange-600", img: "/timer.png", tags: ["Web Audio"] },
-  { id: "05", title: "FW-Seven", category: "System", desc: "Industrial component lib.", link: "https://framework-seven-steel.vercel.app/", color: "bg-zinc-800", img: "/framework.png", tags: ["Storybook"] },
-  { id: "06", title: "MindScribe", category: "AI", desc: "Auto-complete notes.", link: "https://notes-chi-olive.vercel.app", color: "bg-indigo-600", img: "/notes.png", tags: ["OpenAI"] }
+  { id: "01", title: "CryptoPlace", category: "Fintech", desc: "A digital space for tracking and exploring cryptocurrencies trends and insights.", link: "https://crypto-place-brown.vercel.app/", color: "bg-blue-600", img: "/crypto-preview.png", tags: ["React", "Vite.js", "Tailwind", "Chart.js"] },
+  { id: "02", title: "Truth", category: "Art", desc: "A thought-provoking concept exploring perspectives where perception can matter more than objective truth.", link: "https://truthis-optional.vercel.app/", color: "bg-purple-600", img: "/truth.png", tags: ["Three.js", "OpenAI", "Next.js"] },
+  { id: "03", title: "Arguely", category: "Social", desc: "An AI-powered platform that helps structure, analyze, and strengthen arguments with logical clarity.", link: "https://debate-again.vercel.app/", color: "bg-emerald-600", img: "/Arguely.png", tags: ["OpenAI", "Next.js", "Tailwind", "Framer"] },
+  { id: "04", title: "FocusBits", category: "Productivity", desc: "A focus-driven productivity system that breaks goals into small, actionable bits.", link: "https://timer-rho-khaki.vercel.app/", color: "bg-orange-600", img: "/timer.png", tags: ["Web Audio", "API"] },
+  { id: "05", title: "Framwork", category: "System", desc: "A structured foundation that simplifies building, scaling, and maintaining applications.", link: "https://framework-seven-steel.vercel.app/", color: "bg-zinc-800", img: "/framework.png", tags: ["Storybook","GroqSDK"] },
+  { id: "06", title: "MindScribe", category: "AI", desc: "An intelligent writing companion that turns thoughts into clear, expressive content.", link: "https://notes-chi-olive.vercel.app", color: "bg-indigo-600", img: "/notes.png", tags: ["OpenAI","Notes","API"] }
 ];
 
 const TECH_ITEMS = ["Next.js", "React", "TypeScript", "Tailwind", "Framer", "Three.js", "Node.js", "Postgres", "Redis", "Docker", "AWS", "Figma", "Blender", "GSAP"];
 
-// --- BLUEPRINT WRAPPER ---
+// --- 1. NEW: CINEMATIC GRAIN OVERLAY ---
+// Adds a subtle moving noise texture to the entire site
+const GrainOverlay = () => {
+  return (
+    <div className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.07] mix-blend-overlay">
+      <svg className="w-full h-full">
+        <filter id="noiseFilter">
+          <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+      </svg>
+    </div>
+  );
+};
+
+// --- EXISTING UTILS ---
 const Blueprint = ({ children, type, color, show }: { children: React.ReactNode, type: "underline" | "box" | "circle" | "highlight" | "strike-through" | "crossed-off" | "bracket", color: string, show: boolean }) => {
   return (
     <RoughNotation type={type} color={color} show={show} animationDuration={1500} strokeWidth={2} padding={5}>
@@ -70,7 +85,6 @@ const Blueprint = ({ children, type, color, show }: { children: React.ReactNode,
   )
 }
 
-// --- CABLE ---
 function Cable() {
   const path = useRef<SVGPathElement>(null);
   let progress = 0; let x = 0.5; let time = Math.PI / 2; let reqId: number | null = null;
@@ -140,34 +154,14 @@ function TextReveal({ children, className }: { children: string, className?: str
   return <div className="overflow-hidden"><h2 ref={element} className={className}>{children}</h2></div>;
 }
 
-// --- FIXED INFINITE MARQUEE ---
 function InfiniteMarquee() {
   const firstText = useRef<HTMLParagraphElement>(null);
   const secondText = useRef<HTMLParagraphElement>(null);
-  const slider = useRef<HTMLDivElement>(null); // Added missing ref definition
+  const slider = useRef<HTMLDivElement>(null);
   let xPercent = 0; let direction = -1;
-  
   useEffect(() => { requestAnimationFrame(animate); }, []);
-  
-  const animate = () => {
-    if (xPercent <= -100) xPercent = 0;
-    if (xPercent > 0) xPercent = -100;
-    if (firstText.current && secondText.current) {
-        gsap.set(firstText.current, { xPercent: xPercent });
-        gsap.set(secondText.current, { xPercent: xPercent });
-    }
-    xPercent += 0.05 * direction;
-    requestAnimationFrame(animate);
-  }
-  
-  return (
-    <div className="relative flex overflow-hidden py-16 bg-black text-white border-t border-b border-zinc-800 z-20">
-      <div ref={slider} className="relative whitespace-nowrap flex">
-        <p ref={firstText} className={`text-[8vw] font-bold uppercase tracking-tighter leading-none pr-12 ${manrope.className}`}>Available for Freelance • Full Stack Engineer • </p>
-        <p ref={secondText} className={`absolute left-full top-0 text-[8vw] font-bold uppercase tracking-tighter leading-none pr-12 ${manrope.className}`}>Available for Freelance • Full Stack Engineer • </p>
-      </div>
-    </div>
-  )
+  const animate = () => { if (xPercent <= -100) xPercent = 0; if (xPercent > 0) xPercent = -100; if (firstText.current && secondText.current) { gsap.set(firstText.current, { xPercent: xPercent }); gsap.set(secondText.current, { xPercent: xPercent }); } xPercent += 0.05 * direction; requestAnimationFrame(animate); }
+  return (<div className="relative flex overflow-hidden py-16 bg-black text-white border-t border-b border-zinc-800 z-20"><div ref={slider} className="relative whitespace-nowrap flex"><p ref={firstText} className={`text-[8vw] font-bold uppercase tracking-tighter leading-none pr-12 ${manrope.className}`}>Available for Freelance • Full Stack Engineer • </p><p ref={secondText} className={`absolute left-full top-0 text-[8vw] font-bold uppercase tracking-tighter leading-none pr-12 ${manrope.className}`}>Available for Freelance • Full Stack Engineer • </p></div></div>)
 }
 
 function Preloader({ onComplete, theme }: { onComplete: () => void, theme: any }) {
@@ -202,6 +196,7 @@ function GeometricCore({ theme }: { theme: any }) {
   return (<Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}><mesh ref={mesh} scale={2.2}><icosahedronGeometry args={[1, 1]} /><meshBasicMaterial color={colorMap[theme.accent] || "#a3e635"} wireframe wireframeLinewidth={2} /></mesh></Float>);
 }
 
+// --- 2. UPDATED: STACKING CARD WITH 3D TILT ---
 function StackingCard({ project, index, range, targetScale, progress, setIndex, onExpand, theme }: any) {
   const container = useRef(null);
   const { scrollYProgress } = useScroll({ target: container, offset: ['start end', 'start start'] });
@@ -216,8 +211,27 @@ function StackingCard({ project, index, range, targetScale, progress, setIndex, 
              <div><div className="flex items-center gap-4 mb-8"><span className={`text-sm font-bold ${theme.text} ${inter.className}`}>0{index + 1}</span><span className="px-3 py-1 border border-zinc-200 rounded-full text-[10px] font-bold uppercase tracking-widest text-zinc-400">{project.category}</span></div><h2 className={`text-4xl md:text-5xl font-bold leading-tight mb-6 ${manrope.className}`}>{project.title}</h2><p className="text-zinc-500 text-sm leading-relaxed">{project.desc}</p></div>
              <div className="flex flex-col gap-6"><div className="flex gap-2 flex-wrap">{project.tags.map((tag: string) => (<span key={tag} className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 bg-zinc-100 px-3 py-1 rounded-full">{tag}</span>))}</div><Magnetic><a href={project.link} target="_blank" className={`inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest ${theme.text} transition-colors cursor-pointer w-fit hover:opacity-70`}>Live Site <span className="text-lg">↗</span></a></Magnetic></div>
           </div>
+          
+          {/* TILT COMPONENT WRAPPER */}
           <div className="relative w-full md:w-[60%] h-full rounded-2xl overflow-hidden bg-zinc-100 group cursor-pointer" onClick={() => onExpand(project)}>
-             <motion.div layoutId={`image-${project.id}`} style={{ y }} className="w-full h-[120%] relative -top-[10%]"><div className="w-full h-full group-hover:scale-105 transition-transform duration-700"><img src={project.img} alt={project.title} className="object-cover w-full h-full" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /><div className={`absolute inset-0 ${project.color} -z-10`} /><div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20"><span className="text-white font-bold uppercase tracking-widest bg-black px-4 py-2 rounded-full">Quick View</span></div></div></motion.div>
+             <Tilt 
+               glareEnable={true} 
+               glareMaxOpacity={0.4} 
+               scale={1.02} 
+               perspective={800} 
+               transitionSpeed={1500} 
+               tiltMaxAngleX={5} 
+               tiltMaxAngleY={5} 
+               className="w-full h-full"
+             >
+                <motion.div layoutId={`image-${project.id}`} style={{ y }} className="w-full h-[120%] relative -top-[10%]">
+                    <div className="w-full h-full group-hover:scale-105 transition-transform duration-700">
+                        <img src={project.img} alt={project.title} className="object-cover w-full h-full" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                        <div className={`absolute inset-0 ${project.color} -z-10`} />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20"><span className="text-white font-bold uppercase tracking-widest bg-black px-4 py-2 rounded-full">Quick View</span></div>
+                    </div>
+                </motion.div>
+             </Tilt>
           </div>
         </div>
       </motion.div>
@@ -227,7 +241,7 @@ function StackingCard({ project, index, range, targetScale, progress, setIndex, 
 
 function SpotifyStatus({ theme }: { theme: any }) {
   return (
-    <div className="flex items-center gap-4 mt-12 md:mt-0 p-4 border border-zinc-100 bg-white/50 backdrop-blur-md rounded-2xl w-fit">
+    <div className="flex items-center gap-4 mt-12 md:mt-0 p-4 border border-zinc-100  backdrop-blur-md rounded-2xl w-fit">
       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.accent} text-white shadow-lg`}><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.48.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141 4.38-1.38 9.841-.72 13.441 1.56.419.24.6.84.3 1.26zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" /></svg></div>
       <div className="flex flex-col"><span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-1">Now Playing</span><div className="flex items-center gap-3"><div className="flex gap-[3px] items-end h-3"><span className={`w-1 rounded-full ${theme.accent} animate-[bounce_1s_infinite]`} style={{ height: '60%' }} /><span className={`w-1 rounded-full ${theme.accent} animate-[bounce_1.5s_infinite]`} style={{ height: '100%' }} /><span className={`w-1 rounded-full ${theme.accent} animate-[bounce_0.8s_infinite]`} style={{ height: '40%' }} /><span className={`w-1 rounded-full ${theme.accent} animate-[bounce_1.2s_infinite]`} style={{ height: '80%' }} /></div><a href="https://open.spotify.com" target="_blank" className={`text-xs font-bold ${theme.text} hover:underline truncate max-w-[150px]`}>Starboy - The Weeknd</a></div></div>
     </div>
@@ -238,7 +252,7 @@ function Footer({ theme, onCopy }: { theme: any, onCopy: () => void }) {
   return (
     <div className="fixed bottom-0 h-[80vh] w-full bg-black text-white z-0 flex flex-col justify-between p-12 md:p-24" style={{ clipPath: "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)" }}>
       <div className="flex justify-between items-start"><h2 className={`text-[12vw] leading-[0.8] font-black tracking-tighter ${manrope.className}`}>LET'S<br/><span className={theme.text}>TALK</span></h2><div className="hidden md:flex flex-col gap-4 text-right"><a href="https://www.linkedin.com/in/md-moshin-khan-65510a24b" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors">LinkedIn ↗</a><a href="https://github.com/mkhan0012" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors">GitHub ↗</a></div></div>
-      <div className="flex flex-col md:flex-row justify-between items-end gap-10"><div className="flex flex-col gap-6"><div><p className="text-zinc-500 uppercase tracking-widest text-xs mb-2">Got a project?</p><Magnetic><button onClick={onCopy} className={`text-2xl md:text-4xl font-bold ${theme.text} transition-colors border-b border-zinc-800 pb-2`}>hello@moshin.dev</button></Magnetic></div><SpotifyStatus theme={theme} /></div><p className="text-zinc-600 text-xs font-bold uppercase tracking-widest">© 2026 Md Moshin Khan</p></div>
+      <div className="flex flex-col md:flex-row justify-between items-end gap-10"><div className="flex flex-col gap-6"><div><p className="text-zinc-500 uppercase tracking-widest text-xs mb-2">Got a project?</p><Magnetic><button onClick={onCopy} className={`text-2xl md:text-4xl font-bold ${theme.text} transition-colors border-b border-zinc-800 pb-2`}>moshink0786@gmail.com</button></Magnetic></div><SpotifyStatus theme={theme} /></div><p className="text-zinc-600 text-xs font-bold uppercase tracking-widest">© 2026 Md Moshin Khan</p></div>
     </div>
   )
 }
@@ -266,7 +280,7 @@ export default function Home() {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [theme, setTheme] = useState(THEMES.afternoon); 
   const [showNotification, setShowNotification] = useState(false);
-  const [showBlueprints, setShowBlueprints] = useState(false); // Trigger sketches
+  const [showBlueprints, setShowBlueprints] = useState(false); 
   
   useEffect(() => {
     const hour = new Date().getHours();
@@ -291,14 +305,13 @@ export default function Home() {
         gsap.from(".hero-char", { y: 150, opacity: 0, duration: 1.5, stagger: 0.05, ease: "power4.out", delay: 0.2 });
         gsap.from(".hero-fade", { y: 20, opacity: 0, duration: 1, ease: "power2.out", delay: 1 });
       }, container);
-      // Delay showing blueprints to match hero animation
       setTimeout(() => setShowBlueprints(true), 2000); 
       return () => ctx.revert();
     }
   }, [isLoading]);
 
   const handleCopy = () => { 
-    navigator.clipboard.writeText("hello@moshin.dev"); 
+    navigator.clipboard.writeText("moshink0786@gmail.com"); 
     setShowNotification(true);
     confetti({ particleCount: 100, spread: 70, origin: { y: 0.9 }, colors: ['#a3e635', '#f97316', '#8b5cf6'] }); // CONFETTI TRIGGER
     setTimeout(() => setShowNotification(false), 2500);
@@ -312,6 +325,9 @@ export default function Home() {
       <HackerMode /> 
       <DynamicIsland message="Email Copied!" visible={showNotification} />
       <InteractiveGrid theme={theme} />
+      
+      {/* CINEMATIC GRAIN OVERLAY */}
+      <GrainOverlay />
       
       <AnimatePresence>
         {selectedProject && (
@@ -336,10 +352,10 @@ export default function Home() {
           <div className="absolute inset-0 z-0 opacity-30 pointer-events-none"><Canvas camera={{ position: [0, 0, 5] }} dpr={[1, 2]}><GeometricCore theme={theme} /></Canvas></div>
           <Cable />
           <div className="relative z-10 text-center">
-            <div className="hero-fade"><h2 className="text-xs md:text-sm font-bold tracking-[0.4em] text-zinc-400 uppercase mb-6">Portfolio · 2026</h2></div>
+            <div className="hero-fade"><h2 className="text-xs md:text-sm font-bold tracking-[0.4em] text-zinc-400 uppercase mb-6">Portfolio · 2025</h2></div>
             <div className="overflow-hidden leading-[0.85]"><h1 className={`text-[13vw] md:text-[9rem] font-black tracking-tighter text-black ${manrope.className}`}><div className="flex justify-center overflow-hidden">{splitText("MD MOSHIN")}</div><div className="flex justify-center overflow-hidden">{splitText("KHAN")}</div></h1></div>
             <div className="hero-fade mt-10 flex flex-col items-center justify-center">
-              {/* NEW: BLUEPRINT ANNOTATIONS */}
+              {/* BLUEPRINT ANNOTATIONS */}
               <p className="text-zinc-500 max-w-md text-sm md:text-base leading-relaxed font-medium">
                 An engineering-focused <Blueprint type="highlight" color={theme.rough + "33"} show={showBlueprints}>creative developer</Blueprint> building <Blueprint type="underline" color={theme.rough} show={showBlueprints}>high-performance</Blueprint> digital architecture.
               </p>

@@ -3,17 +3,39 @@
 @layer base {
   html {
     background-color: #ffffff;
-    cursor: none; /* Hide default cursor */
-  }
-  
-  body {
-    -webkit-font-smoothing: antialiased;
   }
 
-  /* Stroke Text Effect */
+  /* Only hide cursor on devices that actually use a mouse (desktop) */
+  @media (pointer: fine) {
+    html {
+      cursor: none;
+    }
+    
+    /* Ensure interactive elements also don't show the system cursor */
+    a, button, input, textarea {
+      cursor: none;
+    }
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    /* Prevent horizontal overflow issues on mobile */
+    overflow-x: hidden; 
+    width: 100%;
+  }
+
+  /* Stroke Text Effect - Optimized for Mobile */
   .stroke-lime {
-    -webkit-text-stroke: 2px #bef264;
+    /* Thinner stroke for mobile by default (1px) */
+    -webkit-text-stroke: 1px #bef264;
     color: transparent;
+  }
+
+  /* Thicker stroke for larger screens (2px) */
+  @media (min-width: 768px) {
+    .stroke-lime {
+      -webkit-text-stroke: 2px #bef264;
+    }
   }
   
   .stroke-lime:hover {
@@ -22,7 +44,13 @@
     transition: all 0.3s ease;
   }
   
-  /* Scrollbar Hide */
-  ::-webkit-scrollbar { display: none; }
-  * { scrollbar-width: none; }
+  /* Scrollbar Hide - Support for all browsers */
+  ::-webkit-scrollbar { 
+    display: none; 
+  }
+  
+  html, body {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
 }
