@@ -14,12 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://new-portfolio-nine-indol.vercel.app"),
   title: "Md Moshin Khan | Full Stack Engineer",
   description: "Portfolio of Md Moshin Khan, a Full Stack Engineer and Creative Developer building high-performance digital architecture.",
   openGraph: {
     title: "Md Moshin Khan | Full Stack Engineer",
     description: "Portfolio of Md Moshin Khan - Creative Developer & Engineer.",
-    url: "moshink0786@gmail.com",
+    url: "/",
     siteName: "Md Moshin Khan Portfolio",
     images: [
       {

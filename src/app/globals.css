@@ -3,6 +3,7 @@
 @layer base {
   html {
     background-color: #ffffff;
+    position: relative; /* FIX: Added to resolve Framer Motion scroll error */
   }
 
   /* Only hide cursor on devices that actually use a mouse (desktop) */
