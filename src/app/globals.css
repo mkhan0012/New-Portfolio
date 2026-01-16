@@ -3,55 +3,100 @@
 @layer base {
   html {
     background-color: #ffffff;
-    position: relative; /* FIX: Added to resolve Framer Motion scroll error */
+    position: relative;
   }
 
-  /* Only hide cursor on devices that actually use a mouse (desktop) */
   @media (pointer: fine) {
-    html {
-      cursor: none;
-    }
-    
-    /* Ensure interactive elements also don't show the system cursor */
-    a, button, input, textarea {
-      cursor: none;
-    }
+    html { cursor: none; }
+    a, button, input, textarea { cursor: none; }
   }
 
   body {
     -webkit-font-smoothing: antialiased;
-    /* Prevent horizontal overflow issues on mobile */
     overflow-x: hidden; 
     width: 100%;
   }
 
-  /* Stroke Text Effect - Optimized for Mobile */
-  .stroke-lime {
-    /* Thinner stroke for mobile by default (1px) */
-    -webkit-text-stroke: 1px #bef264;
-    color: transparent;
+  /* --- UTILITIES --- */
+  ::-webkit-scrollbar { display: none; }
+  html, body { scrollbar-width: none; -ms-overflow-style: none; }
+
+  /* 1. TEXT OUTLINE */
+  .text-outline { -webkit-text-stroke: 1px #d4d4d8; color: transparent; }
+  .text-outline-bold { -webkit-text-stroke: 2px #d4d4d8; color: transparent; }
+
+  /* 2. SHIMMER */
+  @keyframes shimmer {
+    from { transform: translateX(-100%) skewX(-15deg); }
+    to { transform: translateX(200%) skewX(-15deg); }
+  }
+  .animate-shimmer {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.5) 50%, transparent 100%);
+    animation: shimmer 2.5s infinite;
   }
 
-  /* Thicker stroke for larger screens (2px) */
-  @media (min-width: 768px) {
-    .stroke-lime {
-      -webkit-text-stroke: 2px #bef264;
-    }
+  /* 3. GLITCH TEXT */
+  .glitch-wrapper { position: relative; display: inline-block; color: black; }
+  .glitch-wrapper::before, .glitch-wrapper::after {
+    content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white;
   }
-  
-  .stroke-lime:hover {
-    color: #bef264;
-    -webkit-text-stroke: 0px transparent;
-    transition: all 0.3s ease;
+  .glitch-wrapper:hover::before {
+    left: 2px; text-shadow: -1px 0 #ff00c1; clip-path: inset(44% 0 61% 0); animation: glitch-anim 0.4s infinite linear alternate-reverse;
   }
-  
-  /* Scrollbar Hide - Support for all browsers */
-  ::-webkit-scrollbar { 
-    display: none; 
+  .glitch-wrapper:hover::after {
+    left: -2px; text-shadow: -1px 0 #00fff9; clip-path: inset(54% 0 31% 0); animation: glitch-anim-2 0.4s infinite linear alternate-reverse;
   }
-  
-  html, body {
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
+  @keyframes glitch-anim {
+    0% { clip-path: inset(50% 0 30% 0); } 100% { clip-path: inset(60% 0 10% 0); }
+  }
+  @keyframes glitch-anim-2 {
+    0% { clip-path: inset(10% 0 70% 0); } 100% { clip-path: inset(50% 0 30% 0); }
+  }
+
+  /* 4. NEON PULSE */
+  @keyframes neonPulse {
+    0% { box-shadow: 0 0 5px rgba(163, 230, 53, 0.2); border-color: rgba(0,0,0,1); }
+    50% { box-shadow: 0 0 15px rgba(163, 230, 53, 0.4); border-color: #a3e635; }
+    100% { box-shadow: 0 0 5px rgba(163, 230, 53, 0.2); border-color: rgba(0,0,0,1); }
+  }
+  .neon-chip { animation: neonPulse 3s infinite ease-in-out; }
+
+  /* 5. SONAR PULSE (For Header Dot) */
+  @keyframes sonar {
+    0% { transform: scale(0.9); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+  .sonar-effect {
+    position: relative;
+  }
+  .sonar-effect::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    border-radius: 50%;
+    background-color: inherit;
+    z-index: -1;
+    animation: sonar 1.5s infinite cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  /* 6. RGB IMAGE GLITCH (On Hover) */
+  .rgb-glitch-container {
+    position: relative;
+    overflow: hidden;
+  }
+  .rgb-glitch-container img {
+    transition: transform 0.3s ease;
+  }
+  .rgb-glitch-container:hover img {
+    animation: rgbShift 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+  @keyframes rgbShift {
+    0% { transform: translate(0) scale(1); filter: drop-shadow(0 0 0 transparent); }
+    20% { transform: translate(-2px, 1px) scale(1.01); filter: drop-shadow(-2px 0 0 rgba(255,0,0,0.5)) drop-shadow(2px 0 0 rgba(0,255,255,0.5)); }
+    40% { transform: translate(2px, -1px) scale(1.02); filter: drop-shadow(2px 0 0 rgba(255,0,0,0.5)) drop-shadow(-2px 0 0 rgba(0,255,255,0.5)); }
+    60% { transform: translate(-1px, 2px) scale(1.03); filter: drop-shadow(-2px 0 0 rgba(255,0,0,0.5)) drop-shadow(2px 0 0 rgba(0,255,255,0.5)); }
+    80% { transform: translate(1px, -2px) scale(1.04); filter: drop-shadow(2px 0 0 rgba(255,0,0,0.5)) drop-shadow(-2px 0 0 rgba(0,255,255,0.5)); }
+    100% { transform: translate(0) scale(1.05); filter: drop-shadow(0 0 0 transparent); }
   }
 }
