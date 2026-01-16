@@ -23,6 +23,7 @@ const inter = Inter({ subsets: ["latin"] });
 const manrope = Manrope({ subsets: ["latin"] });
 const mono = JetBrains_Mono({ subsets: ["latin"] });
 
+// --- THEMES ---
 const THEMES = {
   morning: { 
     name: "Sunrise",
@@ -67,9 +68,16 @@ const PROJECTS = [
   { id: "06", title: "MindScribe", category: "AI", desc: "An intelligent writing companion that turns thoughts into clear, expressive content.", link: "https://notes-chi-olive.vercel.app", color: "bg-indigo-600", img: "/notes.png", tags: ["OpenAI","Notes","API"] }
 ];
 
-const TECH_ITEMS = ["Next.js", "React", "TypeScript", "Tailwind", "Framer", "Three.js", "Node.js", "Postgres", "Redis", "Docker", "AWS", "Figma", "Blender", "GSAP"];
+// --- UPDATED TECH ITEMS (ALL SKILLS ADDED) ---
+const TECH_ITEMS = [
+  "Next.js 15", "React.js", "Tailwind v4", "TypeScript", "JavaScript (ES6+)", 
+  "Redux Toolkit", "Framer Motion", "Node.js", "Prisma ORM", "PostgreSQL", 
+  "Firebase", "Server Actions", "Git", "Vercel", "Zod", 
+  "C++", "SQL", "HTML5", "CSS3", 
+  "AI Integration", "AES Encryption", "REST APIs", "UI/UX Design"
+];
 
-// --- UTILS ---
+// --- UTILS & ANIMATIONS ---
 const GrainOverlay = () => (
   <div className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.07] mix-blend-overlay">
     <svg className="w-full h-full"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" /></filter><rect width="100%" height="100%" filter="url(#noiseFilter)" /></svg>
@@ -88,7 +96,7 @@ const HyperText = ({ text, className }: { text: string, className?: string }) =>
   return <span onMouseEnter={scramble} className={className}>{displayText}</span>;
 };
 
-// --- HEADER COMPONENT ---
+// --- ARCHITECTURAL HEADER ---
 function CreativeProjectHeader({ theme }: { theme: any }) {
   return (
     <div className="relative flex flex-col items-center justify-center mb-32">
@@ -108,7 +116,7 @@ function CreativeProjectHeader({ theme }: { theme: any }) {
   );
 }
 
-// --- UTILS ---
+// --- EXISTING COMPONENTS ---
 const Blueprint = ({ children, type, color, show }: { children: React.ReactNode, type: "underline" | "box" | "circle" | "highlight" | "strike-through" | "crossed-off" | "bracket", color: string, show: boolean }) => (
   <RoughNotation type={type} color={color} show={show} animationDuration={1500} strokeWidth={2} padding={5}>{children}</RoughNotation>
 )
@@ -299,7 +307,7 @@ function Header({ theme }: { theme: any }) {
       <div className="flex flex-col items-start pointer-events-auto"><h1 className={`text-xl font-bold tracking-tight ${manrope.className} text-white md:text-black md:mix-blend-normal`}>MOSHIN.DEV</h1><span className="text-xs text-zinc-500 font-medium tracking-widest mt-1"><HyperText text="FULL STACK ENGINEER" /></span></div>
       <div className="hidden md:flex flex-col items-end text-xs font-medium tracking-widest text-zinc-500 uppercase">
         <span className="flex items-center gap-2">
-          {/* UPDATED: SONAR DOT */}
+          {/* SONAR DOT */}
           <span className={`relative w-2 h-2 ${theme.accent} rounded-full sonar-effect`} /> 
           Available for Work
         </span>
@@ -327,11 +335,10 @@ export default function Home() {
   
   useEffect(() => {
     const hour = new Date().getHours();
-    // Use the new Hazard/Safety theme if late at night, or keep previous logic
     if (hour >= 6 && hour < 12) setTheme(THEMES.morning); 
     else if (hour >= 12 && hour < 18) setTheme(THEMES.afternoon); 
     else if (hour >= 18 && hour < 22) setTheme(THEMES.night);
-    else setTheme(THEMES.hazard); // Late night hazard mode
+    else setTheme(THEMES.hazard); 
   }, []);
 
   useEffect(() => {
@@ -345,7 +352,6 @@ export default function Home() {
   useEffect(() => {
     if (!isLoading) {
       const ctx = gsap.context(() => {
-        // FIX: Replaced old .hero-char target with .hero-glitch-text wrapper for smoother fade in
         gsap.from(".hero-glitch-text", { y: 100, opacity: 0, duration: 1.5, stagger: 0.2, ease: "power4.out", delay: 0.2 });
         gsap.from(".hero-fade", { y: 20, opacity: 0, duration: 1, ease: "power2.out", delay: 1 });
       }, container);
