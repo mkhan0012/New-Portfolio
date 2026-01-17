@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, ReactElement, cloneElement } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Stars } from "@react-three/drei";
+import { Float, Stars, MeshDistortMaterial, Sphere } from "@react-three/drei";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import Lenis from "@studio-freight/lenis";
 import { Inter, Manrope, JetBrains_Mono } from "next/font/google";
@@ -99,7 +99,7 @@ const HyperText = ({ text, className }: { text: string, className?: string }) =>
   return <span onMouseEnter={scramble} className={className}>{displayText}</span>;
 };
 
-// --- COMPONENT: CREATIVE HEADER ---
+// --- ARCHITECTURAL HEADER ---
 function CreativeProjectHeader({ theme }: { theme: any }) {
   return (
     <div className="relative flex flex-col items-center justify-center mb-32">
@@ -119,7 +119,7 @@ function CreativeProjectHeader({ theme }: { theme: any }) {
   );
 }
 
-// --- UTILITY WRAPPERS ---
+// --- EXISTING COMPONENTS ---
 const Blueprint = ({ children, type, color, show }: { children: React.ReactNode, type: "underline" | "box" | "circle" | "highlight" | "strike-through" | "crossed-off" | "bracket", color: string, show: boolean }) => (
   <RoughNotation type={type} color={color} show={show} animationDuration={1500} strokeWidth={2} padding={5}>{children}</RoughNotation>
 )
@@ -287,7 +287,7 @@ function Magnetic({ children }: { children: ReactElement }) {
   return cloneElement(children as React.ReactElement<any>, { ref });
 }
 
-// --- ORIGINAL GEOMETRIC CORE (RESTORED AS REQUESTED) ---
+// --- ORIGINAL GEOMETRIC CORE (RESTORED) ---
 function GeometricCore({ theme }: { theme: any }) {
   const mesh = useRef<THREE.Mesh>(null);
   const colorMap: any = { "bg-orange-500": "#f97316", "bg-lime-400": "#a3e635", "bg-violet-500": "#8b5cf6", "bg-yellow-400": "#fbbf24" };
@@ -362,40 +362,33 @@ function StackingCard({ project, index, range, targetScale, progress, setIndex, 
   )
 }
 
-// --- NEW NEURAL LINK IDENTITY WIDGET (Replaces System Status) ---
-function NeuralLink({ theme }: { theme: any }) {
-  const [hash, setHash] = useState("INIT...");
-  const [status, setStatus] = useState("ONLINE");
+// --- NEW FUTURISTIC SESSION ID WIDGET ---
+function NeuralSessionWidget({ theme }: { theme: any }) {
+  const [sessionID, setSessionID] = useState("INIT");
 
   useEffect(() => {
-    // Generate a random "session" hash for visual complexity
-    const chars = "ABCDEF0123456789";
-    const generateHash = () => "ID-" + Array(6).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join("");
-    setHash(generateHash());
-
-    const statuses = ["ONLINE", "SYNCED", "SECURE", "LINKED"];
-    const interval = setInterval(() => {
-      setStatus(statuses[Math.floor(Math.random() * statuses.length)]);
-    }, 4000);
-    return () => clearInterval(interval);
+    // Generate a cool looking "session hash"
+    setSessionID(Math.random().toString(36).substring(2, 8).toUpperCase());
   }, []);
 
   return (
-    <div className="flex flex-col gap-2 p-4 border border-zinc-100/50 backdrop-blur-md rounded-2xl w-full md:w-fit bg-white/5 transition-colors hover:bg-white/10 group">
-      <div className="flex items-center justify-between gap-10">
-        <div className="flex items-center gap-3">
-          {/* Pulsing Neural Node */}
-          <div className="relative flex items-center justify-center w-2 h-2">
-            <span className={`absolute w-full h-full rounded-full ${theme.accent} opacity-50 animate-ping`} />
-            <span className={`relative w-1.5 h-1.5 rounded-full ${theme.accent}`} />
-          </div>
-          <span className={`text-[10px] font-bold tracking-[0.2em] uppercase ${theme.text}`}>Neural Link</span>
+    <div className="flex flex-col gap-3 p-4 border border-white/10 backdrop-blur-md rounded-xl w-full md:w-fit bg-black/40 hover:bg-black/60 transition-all group">
+      <div className="flex items-center justify-between gap-8">
+        <div className="flex items-center gap-2">
+          {/* Blinking green connection light */}
+          <span className={`w-2 h-2 rounded-full ${theme.accent} animate-pulse shadow-[0_0_10px_currentColor]`} />
+          <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400">Secure Link</span>
         </div>
-        <span className="text-[10px] font-bold tracking-widest text-zinc-500 font-mono">{status}</span>
       </div>
-      <div className="flex flex-col gap-1 mt-1">
-        <span className={`text-xl font-bold tracking-tighter ${manrope.className} group-hover:text-white transition-colors duration-300`}>{hash}</span>
-        <span className="text-[9px] text-zinc-500 uppercase tracking-widest">Encrypted Session</span>
+      <div className="flex flex-col">
+        <div className="flex items-end gap-2">
+          <span className="text-zinc-600 text-[10px] font-mono mb-1">ID:</span>
+          {/* Scramble effect on hover */}
+          <span className={`text-2xl font-mono font-bold leading-none ${theme.text} group-hover:text-white transition-colors`}>
+            <HyperText text={sessionID} />
+          </span>
+        </div>
+        <span className="text-[9px] text-zinc-600 font-mono mt-1">ENCRYPTION: 256-BIT // ACTIVE</span>
       </div>
     </div>
   )
@@ -403,22 +396,24 @@ function NeuralLink({ theme }: { theme: any }) {
 
 function Footer({ theme, onCopy }: { theme: any, onCopy: () => void }) {
   return (
-    <div className="fixed bottom-0 min-h-[50vh] md:h-[80vh] w-full bg-black text-white z-0 flex flex-col justify-between p-6 md:p-24" style={{ clipPath: "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)" }}>
+    // OPTIMIZATION: Fixed height to 80vh on mobile too to match the margin-bottom of content
+    <div className="fixed bottom-0 h-[80vh] w-full bg-black text-white z-0 flex flex-col justify-between p-6 md:p-24" style={{ clipPath: "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)" }}>
       <div className="flex flex-col md:flex-row justify-between items-start w-full">
-        <h2 className={`text-[12vw] leading-[0.8] font-black tracking-tighter ${manrope.className}`}>LET'S<br /><span className={theme.text}>TALK</span></h2>
+        {/* RESPONSIVE TYPE: text-[22vw] on mobile to match the massive impact of PC */}
+        <h2 className={`text-[22vw] md:text-[12vw] leading-[0.8] font-black tracking-tighter ${manrope.className}`}>LET'S<br /><span className={theme.text}>TALK</span></h2>
         <div className="flex md:flex-col gap-4 text-left md:text-right mt-8 md:mt-0">
           <a href="https://www.linkedin.com/in/md-moshin-khan-65510a24b" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors">LinkedIn ↗</a>
           <a href="https://github.com/mkhan0012" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors">GitHub ↗</a>
         </div>
       </div>
-      <div className="flex flex-col md:flex-row justify-between items-end gap-10 w-full mt-10 md:mt-0">
+      <div className="flex flex-col md:flex-row justify-between items-end gap-10 w-full mt-10 md:mt-0 pb-10 md:pb-0">
         <div className="flex flex-col gap-6 w-full md:w-auto">
           <div>
             <p className="text-zinc-500 uppercase tracking-widest text-xs mb-2">Got a project?</p>
             <Magnetic><button onClick={onCopy} className={`text-xl md:text-4xl font-bold ${theme.text} transition-colors border-b border-zinc-800 pb-2 break-all md:break-normal`}>moshink0786@gmail.com</button></Magnetic>
           </div>
-          {/* Updated Futuristic Neural Link Widget */}
-          <NeuralLink theme={theme} />
+          {/* New Futuristic Widget */}
+          <NeuralSessionWidget theme={theme} />
         </div>
         <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest w-full md:w-auto text-left md:text-right">© 2025 Md Moshin Khan</p>
       </div>
@@ -446,7 +441,7 @@ function Header({ theme }: { theme: any }) {
             <span className={`relative w-2 h-2 ${theme.accent} rounded-full sonar-effect`} />
             Available for Work
           </span>
-          <span className="mt-1">{time}</span><span>India</span>
+          <span className="mt-1">{time}</span><span>Rajgangpur, India</span>
         </div>
       </div>
     </header>
