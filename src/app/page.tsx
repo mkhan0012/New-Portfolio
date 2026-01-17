@@ -2,8 +2,8 @@
 
 import { useRef, useEffect, useState, ReactElement, cloneElement } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float } from "@react-three/drei";
-import { motion, useScroll, useTransform, useSpring, AnimatePresence, useInView } from "framer-motion";
+import { Float, Stars } from "@react-three/drei";
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import Lenis from "@studio-freight/lenis";
 import { Inter, Manrope, JetBrains_Mono } from "next/font/google";
 import * as THREE from "three";
@@ -19,6 +19,7 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+// --- FONTS ---
 const inter = Inter({ subsets: ["latin"] });
 const manrope = Manrope({ subsets: ["latin"] });
 const mono = JetBrains_Mono({ subsets: ["latin"] });
@@ -64,7 +65,7 @@ const PROJECTS = [
   { id: "02", title: "Truth", category: "Art", desc: "A thought-provoking concept exploring perspectives where perception can matter more than objective truth.", link: "https://truthis-optional.vercel.app/", color: "bg-purple-600", img: "/truth.png", tags: ["Three.js", "OpenAI", "Next.js"] },
   { id: "03", title: "Arguely", category: "Social", desc: "An AI-powered platform that helps structure, analyze, and strengthen arguments with logical clarity.", link: "https://debate-again.vercel.app/", color: "bg-emerald-600", img: "/Arguely.png", tags: ["OpenAI", "Next.js", "Tailwind", "Framer"] },
   { id: "04", title: "FocusBits", category: "Productivity", desc: "A focus-driven productivity system that breaks goals into small, actionable bits.", link: "https://timer-rho-khaki.vercel.app/", color: "bg-orange-600", img: "/timer.png", tags: ["Web Audio", "API"] },
-  { id: "05", title: "Framwork", category: "System", desc: "A structured foundation that simplifies building, scaling, and maintaining applications.", link: "https://framework-seven-steel.vercel.app/", color: "bg-zinc-800", img: "/framework.png", tags: ["Storybook", "GroqSDK"] },
+  { id: "05", title: "Framework", category: "System", desc: "A structured foundation that simplifies building, scaling, and maintaining applications.", link: "https://framework-seven-steel.vercel.app/", color: "bg-zinc-800", img: "/framework.png", tags: ["Storybook", "GroqSDK"] },
   { id: "06", title: "MindScribe", category: "AI", desc: "An intelligent writing companion that turns thoughts into clear, expressive content.", link: "https://notes-chi-olive.vercel.app", color: "bg-indigo-600", img: "/notes.png", tags: ["OpenAI", "Notes", "API"] }
 ];
 
@@ -78,8 +79,11 @@ const TECH_ITEMS = [
 
 // --- UTILS & ANIMATIONS ---
 const GrainOverlay = () => (
-  <div className="hidden md:block fixed inset-0 z-[9999] pointer-events-none opacity-[0.07] mix-blend-overlay">
-    <svg className="w-full h-full"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" /></filter><rect width="100%" height="100%" filter="url(#noiseFilter)" /></svg>
+  <div className="hidden md:block fixed inset-0 z-[9999] pointer-events-none mix-blend-overlay">
+    <div className="absolute inset-0 opacity-[0.07]">
+      <svg className="w-full h-full"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" /></filter><rect width="100%" height="100%" filter="url(#noiseFilter)" /></svg>
+    </div>
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
   </div>
 );
 
@@ -95,7 +99,7 @@ const HyperText = ({ text, className }: { text: string, className?: string }) =>
   return <span onMouseEnter={scramble} className={className}>{displayText}</span>;
 };
 
-// --- ARCHITECTURAL HEADER ---
+// --- COMPONENT: CREATIVE HEADER ---
 function CreativeProjectHeader({ theme }: { theme: any }) {
   return (
     <div className="relative flex flex-col items-center justify-center mb-32">
@@ -115,7 +119,7 @@ function CreativeProjectHeader({ theme }: { theme: any }) {
   );
 }
 
-// --- EXISTING COMPONENTS ---
+// --- UTILITY WRAPPERS ---
 const Blueprint = ({ children, type, color, show }: { children: React.ReactNode, type: "underline" | "box" | "circle" | "highlight" | "strike-through" | "crossed-off" | "bracket", color: string, show: boolean }) => (
   <RoughNotation type={type} color={color} show={show} animationDuration={1500} strokeWidth={2} padding={5}>{children}</RoughNotation>
 )
@@ -231,19 +235,17 @@ function InteractiveGrid({ theme }: { theme: any }) {
   return (<div className="hidden md:block fixed inset-0 z-0 pointer-events-none"><div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:40px_40px]" /><div ref={mask} className={`absolute w-[600px] h-[600px] rounded-full ${theme.accent} blur-[100px] opacity-10 -translate-x-1/2 -translate-y-1/2 will-change-transform mix-blend-multiply`} /></div>);
 }
 
-// --- NEW COOL CURSOR ---
-function CustomCursor() {
+// --- CURSOR ---
+function CustomCursor({ variant }: { variant: string }) {
   const cursor = useRef<HTMLDivElement>(null);
   const follower = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!cursor.current || !follower.current) return;
 
-    // Dot: Instant
     const xTo = gsap.quickTo(cursor.current, "x", { duration: 0.1, ease: "power3.out" });
     const yTo = gsap.quickTo(cursor.current, "y", { duration: 0.1, ease: "power3.out" });
 
-    // Follower: Smooth/Lazy
     const xToFollow = gsap.quickTo(follower.current, "x", { duration: 0.6, ease: "power3.out" });
     const yToFollow = gsap.quickTo(follower.current, "y", { duration: 0.6, ease: "power3.out" });
 
@@ -252,28 +254,29 @@ function CustomCursor() {
       xToFollow(e.clientX); yToFollow(e.clientY);
     };
 
-    const hover = () => gsap.to(follower.current, { scale: 3, opacity: 0.5, borderWidth: "1px", duration: 0.3 });
-    const unhover = () => gsap.to(follower.current, { scale: 1, opacity: 1, borderWidth: "2px", duration: 0.3 });
-
-    const handleLinkHover = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('a') || target.closest('button')) hover();
-      else unhover();
-    };
-
     window.addEventListener("mousemove", move);
-    window.addEventListener("mouseover", handleLinkHover); // Detect hover using delegation
-
-    return () => {
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseover", handleLinkHover);
-    };
+    return () => window.removeEventListener("mousemove", move);
   }, []);
+
+  useEffect(() => {
+    if (!follower.current) return;
+    if (variant === 'view') {
+      gsap.to(follower.current, { scale: 5, backgroundColor: "#ffffff", opacity: 1, borderWidth: 0, mixBlendMode: 'difference', duration: 0.3 });
+    } else if (variant === 'hover') {
+      gsap.to(follower.current, { scale: 2, backgroundColor: "transparent", opacity: 0.5, borderWidth: 1, mixBlendMode: 'difference', duration: 0.3 });
+    } else {
+      gsap.to(follower.current, { scale: 1, backgroundColor: "transparent", opacity: 1, borderWidth: 2, mixBlendMode: 'difference', duration: 0.3 });
+    }
+  }, [variant]);
 
   return (
     <>
       <div ref={cursor} className="fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 mix-blend-difference hidden md:block" />
-      <div ref={follower} className="fixed top-0 left-0 w-8 h-8 border-2 border-white rounded-full pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2 mix-blend-difference hidden md:block transition-all ease-out" />
+      <div ref={follower} className="fixed top-0 left-0 w-8 h-8 border-2 border-white rounded-full pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2 mix-blend-difference hidden md:block transition-all ease-out flex items-center justify-center">
+        <AnimatePresence>
+          {variant === 'view' && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-[3px] font-black text-black">VIEW</motion.span>}
+        </AnimatePresence>
+      </div>
     </>
   );
 }
@@ -284,14 +287,26 @@ function Magnetic({ children }: { children: ReactElement }) {
   return cloneElement(children as React.ReactElement<any>, { ref });
 }
 
+// --- ORIGINAL GEOMETRIC CORE (RESTORED AS REQUESTED) ---
 function GeometricCore({ theme }: { theme: any }) {
   const mesh = useRef<THREE.Mesh>(null);
   const colorMap: any = { "bg-orange-500": "#f97316", "bg-lime-400": "#a3e635", "bg-violet-500": "#8b5cf6", "bg-yellow-400": "#fbbf24" };
+
   useFrame((state) => { if (mesh.current) { mesh.current.rotation.x = state.clock.getElapsedTime() * 0.15; mesh.current.rotation.y = state.clock.getElapsedTime() * 0.2; } });
-  return (<Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}><mesh ref={mesh} scale={2.2}><icosahedronGeometry args={[1, 1]} /><meshBasicMaterial color={colorMap[theme.accent] || "#a3e635"} wireframe wireframeLinewidth={2} /></mesh></Float>);
+
+  return (
+    <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+      <mesh ref={mesh} scale={2.2}>
+        <icosahedronGeometry args={[1, 1]} />
+        <meshBasicMaterial color={colorMap[theme.accent] || "#a3e635"} wireframe wireframeLinewidth={2} />
+      </mesh>
+      {/* Kept stars as they add depth without cluttering the wireframe */}
+      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+    </Float>
+  );
 }
 
-function StackingCard({ project, index, range, targetScale, progress, setIndex, onExpand, theme, isMobile }: any) {
+function StackingCard({ project, index, range, targetScale, progress, setIndex, onExpand, theme, isMobile, setCursorVariant }: any) {
   const container = useRef(null);
   const { scrollYProgress } = useScroll({ target: container, offset: ['start end', 'start start'] });
   const scale = useTransform(progress, range, [1, targetScale]);
@@ -324,15 +339,19 @@ function StackingCard({ project, index, range, targetScale, progress, setIndex, 
               <h2 className={`text-4xl md:text-5xl font-bold leading-tight mb-6 ${manrope.className}`}>{project.title}</h2>
               <p className="text-zinc-500 text-sm leading-relaxed">{project.desc}</p>
             </div>
-            <div className="flex flex-col gap-6"><div className="flex gap-2 flex-wrap">{project.tags.map((tag: string) => (<span key={tag} className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 bg-zinc-100 px-3 py-1 rounded-full">{tag}</span>))}</div><Magnetic><a href={project.link} target="_blank" className={`inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest ${theme.text} transition-colors cursor-pointer w-fit hover:opacity-70`}>Live Site <span className="text-lg">↗</span></a></Magnetic></div>
+            <div className="flex flex-col gap-6"><div className="flex gap-2 flex-wrap">{project.tags.map((tag: string) => (<span key={tag} className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 bg-zinc-100 px-3 py-1 rounded-full">{tag}</span>))}</div><Magnetic><a href={project.link} target="_blank" onMouseEnter={() => setCursorVariant('hover')} onMouseLeave={() => setCursorVariant('default')} className={`inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest ${theme.text} transition-colors cursor-pointer w-fit hover:opacity-70`}>Live Site <span className="text-lg">↗</span></a></Magnetic></div>
           </div>
-          <div className="relative w-full md:w-[60%] h-full rounded-2xl overflow-hidden bg-zinc-100 group cursor-pointer rgb-glitch-container" onClick={() => onExpand(project)}>
+          <div
+            className="relative w-full md:w-[60%] h-full rounded-2xl overflow-hidden bg-zinc-100 group cursor-none"
+            onClick={() => onExpand(project)}
+            onMouseEnter={() => setCursorVariant('view')}
+            onMouseLeave={() => setCursorVariant('default')}
+          >
             <Tilt glareEnable={!isMobile} tiltEnable={!isMobile} glareMaxOpacity={0.4} scale={1.02} perspective={800} transitionSpeed={1500} tiltMaxAngleX={5} tiltMaxAngleY={5} className="w-full h-full">
               <motion.div layoutId={`image-${project.id}`} style={{ y }} className="w-full h-[120%] relative -top-[10%]">
                 <div className="w-full h-full group-hover:scale-105 transition-transform duration-700">
                   <img src={project.img} alt={project.title} className="object-cover w-full h-full" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                   <div className={`absolute inset-0 ${project.color} -z-10`} />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20"><span className="text-white font-bold uppercase tracking-widest bg-black px-4 py-2 rounded-full">Quick View</span></div>
                 </div>
               </motion.div>
             </Tilt>
@@ -343,18 +362,48 @@ function StackingCard({ project, index, range, targetScale, progress, setIndex, 
   )
 }
 
-function SpotifyStatus({ theme }: { theme: any }) {
+// --- NEW NEURAL LINK IDENTITY WIDGET (Replaces System Status) ---
+function NeuralLink({ theme }: { theme: any }) {
+  const [hash, setHash] = useState("INIT...");
+  const [status, setStatus] = useState("ONLINE");
+
+  useEffect(() => {
+    // Generate a random "session" hash for visual complexity
+    const chars = "ABCDEF0123456789";
+    const generateHash = () => "ID-" + Array(6).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join("");
+    setHash(generateHash());
+
+    const statuses = ["ONLINE", "SYNCED", "SECURE", "LINKED"];
+    const interval = setInterval(() => {
+      setStatus(statuses[Math.floor(Math.random() * statuses.length)]);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="flex items-center gap-4 mt-6 md:mt-0 p-4 border border-zinc-100  backdrop-blur-md rounded-2xl w-full md:w-fit">
-      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.accent} text-white shadow-lg`}><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.48.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141 4.38-1.38 9.841-.72 13.441 1.56.419.24.6.84.3 1.26zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" /></svg></div>
-      <div className="flex flex-col"><span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-1">Now Playing</span><div className="flex items-center gap-3"><div className="flex gap-[3px] items-end h-3"><span className={`w-1 rounded-full ${theme.accent} animate-[bounce_1s_infinite]`} style={{ height: '60%' }} /><span className={`w-1 rounded-full ${theme.accent} animate-[bounce_1.5s_infinite]`} style={{ height: '100%' }} /><span className={`w-1 rounded-full ${theme.accent} animate-[bounce_0.8s_infinite]`} style={{ height: '40%' }} /><span className={`w-1 rounded-full ${theme.accent} animate-[bounce_1.2s_infinite]`} style={{ height: '80%' }} /></div><a href="https://open.spotify.com" target="_blank" className={`text-xs font-bold ${theme.text} hover:underline truncate max-w-[150px]`}>Starboy - The Weeknd</a></div></div>
+    <div className="flex flex-col gap-2 p-4 border border-zinc-100/50 backdrop-blur-md rounded-2xl w-full md:w-fit bg-white/5 transition-colors hover:bg-white/10 group">
+      <div className="flex items-center justify-between gap-10">
+        <div className="flex items-center gap-3">
+          {/* Pulsing Neural Node */}
+          <div className="relative flex items-center justify-center w-2 h-2">
+            <span className={`absolute w-full h-full rounded-full ${theme.accent} opacity-50 animate-ping`} />
+            <span className={`relative w-1.5 h-1.5 rounded-full ${theme.accent}`} />
+          </div>
+          <span className={`text-[10px] font-bold tracking-[0.2em] uppercase ${theme.text}`}>Neural Link</span>
+        </div>
+        <span className="text-[10px] font-bold tracking-widest text-zinc-500 font-mono">{status}</span>
+      </div>
+      <div className="flex flex-col gap-1 mt-1">
+        <span className={`text-xl font-bold tracking-tighter ${manrope.className} group-hover:text-white transition-colors duration-300`}>{hash}</span>
+        <span className="text-[9px] text-zinc-500 uppercase tracking-widest">Encrypted Session</span>
+      </div>
     </div>
   )
 }
 
 function Footer({ theme, onCopy }: { theme: any, onCopy: () => void }) {
   return (
-    <div className="fixed bottom-0 h-[80vh] w-full bg-black text-white z-0 flex flex-col justify-between p-6 md:p-24" style={{ clipPath: "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)" }}>
+    <div className="fixed bottom-0 min-h-[50vh] md:h-[80vh] w-full bg-black text-white z-0 flex flex-col justify-between p-6 md:p-24" style={{ clipPath: "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)" }}>
       <div className="flex flex-col md:flex-row justify-between items-start w-full">
         <h2 className={`text-[12vw] leading-[0.8] font-black tracking-tighter ${manrope.className}`}>LET'S<br /><span className={theme.text}>TALK</span></h2>
         <div className="flex md:flex-col gap-4 text-left md:text-right mt-8 md:mt-0">
@@ -362,13 +411,14 @@ function Footer({ theme, onCopy }: { theme: any, onCopy: () => void }) {
           <a href="https://github.com/mkhan0012" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors">GitHub ↗</a>
         </div>
       </div>
-      <div className="flex flex-col md:flex-row justify-between items-end gap-10 w-full">
+      <div className="flex flex-col md:flex-row justify-between items-end gap-10 w-full mt-10 md:mt-0">
         <div className="flex flex-col gap-6 w-full md:w-auto">
           <div>
             <p className="text-zinc-500 uppercase tracking-widest text-xs mb-2">Got a project?</p>
             <Magnetic><button onClick={onCopy} className={`text-xl md:text-4xl font-bold ${theme.text} transition-colors border-b border-zinc-800 pb-2 break-all md:break-normal`}>moshink0786@gmail.com</button></Magnetic>
           </div>
-          <SpotifyStatus theme={theme} />
+          {/* Updated Futuristic Neural Link Widget */}
+          <NeuralLink theme={theme} />
         </div>
         <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest w-full md:w-auto text-left md:text-right">© 2025 Md Moshin Khan</p>
       </div>
@@ -380,7 +430,7 @@ function Header({ theme }: { theme: any }) {
   const [time, setTime] = useState("");
   useEffect(() => { const timer = setInterval(() => setTime(format(new Date(), "HH:mm:ss 'IST'")), 1000); return () => clearInterval(timer); }, []);
   return (
-    <header className="fixed top-0 left-0 w-full p-6 md:p-10 flex justify-between items-start z-50 pointer-events-none text-black bg-white/80 backdrop-blur-lg border-b border-white/20">
+    <header className="fixed top-0 left-0 w-full p-6 md:p-10 flex justify-between items-start z-50 pointer-events-none text-black bg-white/80 backdrop-blur-lg border-b border-white/20 transition-all duration-300">
       <div className="flex flex-col items-start pointer-events-auto">
         <h1 className={`text-xl font-bold tracking-tight ${manrope.className} text-black`}>MOSHIN.DEV</h1>
         <span className="text-xs text-zinc-500 font-medium tracking-widest mt-1"><HyperText text="FULL STACK ENGINEER" /></span>
@@ -396,7 +446,7 @@ function Header({ theme }: { theme: any }) {
             <span className={`relative w-2 h-2 ${theme.accent} rounded-full sonar-effect`} />
             Available for Work
           </span>
-          <span className="mt-1">{time}</span><span>Rajgangpur, India</span>
+          <span className="mt-1">{time}</span><span>India</span>
         </div>
       </div>
     </header>
@@ -406,6 +456,14 @@ function Header({ theme }: { theme: any }) {
 const SplitText = ({ children, className }: { children: string, className?: string }) => {
   return <div className={className}><span className="sr-only">{children}</span><span aria-hidden="true">{children.split("").map((char, index) => (<span key={index} className="inline-block overflow-hidden align-top"><motion.span className="inline-block" initial={{ y: "100%" }} whileInView={{ y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.03, ease: [0.33, 1, 0.68, 1] }}>{char === " " ? "\u00A0" : char}</motion.span></span>))}</span></div>;
 };
+
+// --- MOBILE-ONLY SCROLL INDICATOR ---
+const ScrollIndicator = () => (
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2, duration: 1 }} className="absolute bottom-20 left-1/2 -translate-x-1/2 flex md:hidden flex-col items-center gap-2 z-20 pointer-events-none">
+    <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 font-bold">Scroll</span>
+    <motion.div animate={{ y: [0, 5, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="w-1 h-8 rounded-full bg-gradient-to-b from-black/0 via-black/50 to-black/0" />
+  </motion.div>
+);
 
 // --- MAIN PAGE ---
 export default function Home() {
@@ -417,6 +475,8 @@ export default function Home() {
   const [showNotification, setShowNotification] = useState(false);
   const [showBlueprints, setShowBlueprints] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  const [cursorVariant, setCursorVariant] = useState("default");
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
@@ -459,10 +519,12 @@ export default function Home() {
   };
 
   return (
-    <main ref={container} className={`bg-white text-black min-h-screen selection:${theme.accent} selection:text-black ${inter.className} relative transition-colors duration-1000`}>
+    <main ref={container} className={`bg-white text-black min-h-screen selection:${theme.accent} selection:text-black ${inter.className} relative transition-colors duration-1000 cursor-none`}>
       <motion.div className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-lime-400 to-violet-500 origin-left z-[100]" style={{ scaleX }} />
       <Preloader onComplete={() => setIsLoading(false)} theme={theme} />
-      <CustomCursor />
+
+      <CustomCursor variant={cursorVariant} />
+
       <Header theme={theme} />
       <HackerMode />
       <DynamicIsland message="Email Copied!" visible={showNotification} />
@@ -493,7 +555,11 @@ export default function Home() {
             </Canvas>
           </div>
           <Cable />
+          <ScrollIndicator />
           <div className="relative z-10 text-center">
+            {/* AMBIENT GLOW BEHIND TEXT */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-gradient-to-r from-orange-200/40 via-lime-200/40 to-violet-200/40 blur-[100px] -z-10" />
+
             <div className="hero-fade"><h2 className="text-xs md:text-sm font-bold tracking-[0.4em] text-zinc-400 uppercase mb-6">Portfolio · 2025</h2></div>
             <div className="overflow-hidden leading-[0.85]">
               <h1 className={`text-[13vw] md:text-[9rem] font-black tracking-tighter text-black ${manrope.className}`}>
@@ -504,9 +570,9 @@ export default function Home() {
             <div className="hero-fade mt-10 flex flex-col items-center justify-center">
               <p className="text-zinc-500 max-w-md text-sm md:text-base leading-relaxed font-medium">An engineering-focused <Blueprint type="highlight" color={theme.rough + "33"} show={showBlueprints}>creative developer</Blueprint> building <Blueprint type="underline" color={theme.rough} show={showBlueprints}>high-performance</Blueprint> digital architecture.</p>
               <div className="flex flex-col md:flex-row gap-4 mt-8 items-center">
-                <Magnetic><button onClick={() => document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' })} className={`px-8 py-4 bg-black text-white rounded-full font-bold text-xs uppercase tracking-widest ${theme.hover} hover:text-black transition-colors`}>Explore Works</button></Magnetic>
+                <Magnetic><button onMouseEnter={() => setCursorVariant('hover')} onMouseLeave={() => setCursorVariant('default')} onClick={() => document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' })} className={`px-8 py-4 bg-black text-white rounded-full font-bold text-xs uppercase tracking-widest ${theme.hover} hover:text-black transition-colors`}>Explore Works</button></Magnetic>
                 <Magnetic>
-                  <a href="/resume.pdf" download="Md_Moshin_Khan_Resume" className="relative overflow-hidden px-8 py-4 border border-zinc-200 rounded-full font-bold text-xs uppercase tracking-widest text-zinc-500 hover:text-black hover:border-black transition-colors bg-white group"><span className="relative z-10">Download CV</span><div className="animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-300" /></a>
+                  <a href="/resume.pdf" download="Md_Moshin_Khan_Resume" onMouseEnter={() => setCursorVariant('hover')} onMouseLeave={() => setCursorVariant('default')} className="relative overflow-hidden px-8 py-4 border border-zinc-200 rounded-full font-bold text-xs uppercase tracking-widest text-zinc-500 hover:text-black hover:border-black transition-colors bg-white group"><span className="relative z-10">Download CV</span><div className="animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-300" /></a>
                 </Magnetic>
               </div>
             </div>
@@ -515,7 +581,7 @@ export default function Home() {
         <InfiniteMarquee />
         <section id="work" className="relative pt-32 pb-64 bg-zinc-50/50">
           <div className="max-w-7xl mx-auto px-6 md:px-12 mb-24"><CreativeProjectHeader theme={theme} /></div>
-          {PROJECTS.map((project, i) => { const targetScale = 1 - ((PROJECTS.length - i) * 0.05); return <StackingCard key={i} project={project} index={i} range={[i * 0.25, 1]} targetScale={targetScale} progress={scrollYProgress} setIndex={setActiveProjectIndex} onExpand={setSelectedProject} theme={theme} isMobile={isMobile} /> })}
+          {PROJECTS.map((project, i) => { const targetScale = 1 - ((PROJECTS.length - i) * 0.05); return <StackingCard key={i} project={project} index={i} range={[i * 0.25, 1]} targetScale={targetScale} progress={scrollYProgress} setIndex={setActiveProjectIndex} onExpand={setSelectedProject} theme={theme} isMobile={isMobile} setCursorVariant={setCursorVariant} /> })}
         </section>
         <section className="relative bg-white py-32 border-t border-zinc-100 overflow-hidden">
           <div className="max-w-7xl mx-auto px-6 md:px-12 mb-16"><RoughNotationGroup show={true}><SplitText className={`text-4xl font-bold tracking-tight mb-6 text-black ${manrope.className}`}>Technical Arsenal</SplitText><p className="text-sm text-zinc-500 uppercase tracking-widest font-bold">Core Competencies (<Blueprint type="circle" color={theme.rough} show={true}>Drag to throw</Blueprint>)</p></RoughNotationGroup></div>
