@@ -68,7 +68,6 @@ const PROJECTS = [
   { id: "06", title: "MindScribe", category: "AI", desc: "An intelligent writing companion that turns thoughts into clear, expressive content.", link: "https://notes-chi-olive.vercel.app", color: "bg-indigo-600", img: "/notes.png", tags: ["OpenAI","Notes","API"] }
 ];
 
-// --- UPDATED TECH ITEMS (ALL SKILLS ADDED) ---
 const TECH_ITEMS = [
   "Next.js 15", "React.js", "Tailwind v4", "TypeScript", "JavaScript (ES6+)", 
   "Redux Toolkit", "Framer Motion", "Node.js", "Prisma ORM", "PostgreSQL", 
@@ -79,7 +78,8 @@ const TECH_ITEMS = [
 
 // --- UTILS & ANIMATIONS ---
 const GrainOverlay = () => (
-  <div className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.07] mix-blend-overlay">
+  // OPTIMIZATION: Hidden on mobile to save CPU
+  <div className="hidden md:block fixed inset-0 z-[9999] pointer-events-none opacity-[0.07] mix-blend-overlay">
     <svg className="w-full h-full"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" /></filter><rect width="100%" height="100%" filter="url(#noiseFilter)" /></svg>
   </div>
 );
@@ -129,7 +129,8 @@ function Cable() {
     const move = (e: MouseEvent) => { progress += e.movementY * 0.5; };
     window.addEventListener("mousemove", move); animate(); return () => window.removeEventListener("mousemove", move);
   }, []);
-  return <div className="absolute top-0 w-full h-[500px] pointer-events-none z-0 opacity-20"><svg className="w-full h-full"><path ref={path} stroke="currentColor" strokeWidth="2" fill="none" className="text-zinc-400" /></svg></div>;
+  // OPTIMIZATION: Hidden on mobile
+  return <div className="hidden md:block absolute top-0 w-full h-[500px] pointer-events-none z-0 opacity-20"><svg className="w-full h-full"><path ref={path} stroke="currentColor" strokeWidth="2" fill="none" className="text-zinc-400" /></svg></div>;
 }
 
 function DynamicIsland({ message, visible }: { message: string, visible: boolean }) {
@@ -163,7 +164,11 @@ const HackerMode = () => {
 const GravityArsenal = ({ theme }: { theme: any }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const elementsRef = useRef<(HTMLDivElement | null)[]>([]);
+  
   useEffect(() => {
+    // OPTIMIZATION: Disable physics on mobile
+    if (typeof window !== "undefined" && window.innerWidth < 768) return; 
+    
     if (!containerRef.current) return;
     const Engine = Matter.Engine, World = Matter.World, Bodies = Matter.Bodies, Mouse = Matter.Mouse, MouseConstraint = Matter.MouseConstraint, Runner = Matter.Runner;
     const engine = Engine.create(); const world = engine.world;
@@ -178,10 +183,17 @@ const GravityArsenal = ({ theme }: { theme: any }) => {
     const updateLoop = () => { techBodies.forEach((body, i) => { const el = elementsRef.current[i]; if(el) el.style.transform = `translate(${body.position.x - el.offsetWidth/2}px, ${body.position.y - el.offsetHeight/2}px) rotate(${body.angle}rad)`; }); requestAnimationFrame(updateLoop); }; updateLoop();
     return () => { Runner.stop(runner); Engine.clear(engine); World.clear(world, false); };
   }, []);
+
   return (
-    <div ref={containerRef} className="relative w-full h-[600px] bg-zinc-50 border-y border-zinc-200 overflow-hidden cursor-grab active:cursor-grabbing">
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none"><h3 className={`text-[10vw] font-black text-zinc-100 ${manrope.className} uppercase tracking-tighter`}>Playground</h3></div>
-      {TECH_ITEMS.map((item, i) => (<div key={i} ref={(el) => { elementsRef.current[i] = el }} className={`absolute top-0 left-0 px-6 py-3 bg-white border-2 border-black rounded-full text-sm font-bold uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] select-none neon-chip ${theme.hover}`}>{item}</div>))}
+    // OPTIMIZATION: Flex layout for mobile fallback, block for desktop physics
+    <div ref={containerRef} className="relative w-full min-h-[400px] md:h-[600px] bg-zinc-50 border-y border-zinc-200 overflow-hidden cursor-grab active:cursor-grabbing flex flex-wrap items-center justify-center gap-3 p-6 md:block">
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none"><h3 className={`text-[10vw] font-black text-zinc-100 ${manrope.className} uppercase tracking-tighter opacity-60 md:opacity-100`}>Playground</h3></div>
+      {TECH_ITEMS.map((item, i) => (
+        // OPTIMIZATION: Relative positioning for mobile flex, Absolute for desktop physics
+        <div key={i} ref={(el) => { elementsRef.current[i] = el }} className={`relative md:absolute md:top-0 md:left-0 px-6 py-3 bg-white border-2 border-black rounded-full text-sm font-bold uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] select-none neon-chip ${theme.hover}`}>
+          {item}
+        </div>
+      ))}
     </div>
   );
 };
@@ -207,7 +219,8 @@ function Preloader({ onComplete, theme }: { onComplete: () => void, theme: any }
 function InteractiveGrid({ theme }: { theme: any }) {
   const mask = useRef<HTMLDivElement>(null);
   useEffect(() => { const moveMask = (e: MouseEvent) => { if (!mask.current) return; gsap.to(mask.current, { x: e.clientX, y: e.clientY, duration: 0.5, ease: "power2.out" }); }; window.addEventListener("mousemove", moveMask); return () => window.removeEventListener("mousemove", moveMask); }, []);
-  return (<div className="fixed inset-0 z-0 pointer-events-none"><div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:40px_40px]" /><div ref={mask} className={`absolute w-[600px] h-[600px] rounded-full ${theme.accent} blur-[100px] opacity-10 -translate-x-1/2 -translate-y-1/2 will-change-transform mix-blend-multiply`} /></div>);
+  // OPTIMIZATION: Hidden on mobile
+  return (<div className="hidden md:block fixed inset-0 z-0 pointer-events-none"><div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:40px_40px]" /><div ref={mask} className={`absolute w-[600px] h-[600px] rounded-full ${theme.accent} blur-[100px] opacity-10 -translate-x-1/2 -translate-y-1/2 will-change-transform mix-blend-multiply`} /></div>);
 }
 
 function CustomCursor() {
@@ -229,7 +242,8 @@ function GeometricCore({ theme }: { theme: any }) {
   return (<Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}><mesh ref={mesh} scale={2.2}><icosahedronGeometry args={[1, 1]} /><meshBasicMaterial color={colorMap[theme.accent] || "#a3e635"} wireframe wireframeLinewidth={2} /></mesh></Float>);
 }
 
-function StackingCard({ project, index, range, targetScale, progress, setIndex, onExpand, theme }: any) {
+// OPTIMIZATION: Added isMobile prop to control tilt
+function StackingCard({ project, index, range, targetScale, progress, setIndex, onExpand, theme, isMobile }: any) {
   const container = useRef(null);
   const { scrollYProgress } = useScroll({ target: container, offset: ['start end', 'start start'] });
   const scale = useTransform(progress, range, [1, targetScale]);
@@ -265,7 +279,8 @@ function StackingCard({ project, index, range, targetScale, progress, setIndex, 
              <div className="flex flex-col gap-6"><div className="flex gap-2 flex-wrap">{project.tags.map((tag: string) => (<span key={tag} className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 bg-zinc-100 px-3 py-1 rounded-full">{tag}</span>))}</div><Magnetic><a href={project.link} target="_blank" className={`inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest ${theme.text} transition-colors cursor-pointer w-fit hover:opacity-70`}>Live Site <span className="text-lg">↗</span></a></Magnetic></div>
           </div>
           <div className="relative w-full md:w-[60%] h-full rounded-2xl overflow-hidden bg-zinc-100 group cursor-pointer rgb-glitch-container" onClick={() => onExpand(project)}>
-             <Tilt glareEnable={true} glareMaxOpacity={0.4} scale={1.02} perspective={800} transitionSpeed={1500} tiltMaxAngleX={5} tiltMaxAngleY={5} className="w-full h-full">
+             {/* OPTIMIZATION: Disable Tilt on mobile to prevent repaints/lag */}
+             <Tilt glareEnable={!isMobile} tiltEnable={!isMobile} glareMaxOpacity={0.4} scale={1.02} perspective={800} transitionSpeed={1500} tiltMaxAngleX={5} tiltMaxAngleY={5} className="w-full h-full">
                 <motion.div layoutId={`image-${project.id}`} style={{ y }} className="w-full h-[120%] relative -top-[10%]">
                     <div className="w-full h-full group-hover:scale-105 transition-transform duration-700">
                         <img src={project.img} alt={project.title} className="object-cover w-full h-full" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -330,9 +345,19 @@ export default function Home() {
   const [theme, setTheme] = useState(THEMES.afternoon); 
   const [showNotification, setShowNotification] = useState(false);
   const [showBlueprints, setShowBlueprints] = useState(false); 
+  const [isMobile, setIsMobile] = useState(false); // OPTIMIZATION: State for mobile check
+
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
   
+  // OPTIMIZATION: Detect Mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour >= 6 && hour < 12) setTheme(THEMES.morning); 
@@ -394,7 +419,12 @@ export default function Home() {
 
       <div className="relative z-10 bg-white mb-[80vh] shadow-[0px_50px_100px_rgba(0,0,0,0.5)]">
         <section className="relative h-screen w-full flex flex-col justify-center items-center px-4 overflow-hidden">
-          <div className="absolute inset-0 z-0 opacity-30 pointer-events-none"><Canvas camera={{ position: [0, 0, 5] }} dpr={[1, 2]}><GeometricCore theme={theme} /></Canvas></div>
+          <div className="absolute inset-0 z-0 opacity-30 pointer-events-none">
+            {/* OPTIMIZATION: Reduce DPR on mobile */}
+            <Canvas camera={{ position: [0, 0, 5] }} dpr={isMobile ? [1, 1] : [1, 2]}>
+              <GeometricCore theme={theme} />
+            </Canvas>
+          </div>
           <Cable />
           <div className="relative z-10 text-center">
             <div className="hero-fade"><h2 className="text-xs md:text-sm font-bold tracking-[0.4em] text-zinc-400 uppercase mb-6">Portfolio · 2025</h2></div>
@@ -418,7 +448,8 @@ export default function Home() {
         <InfiniteMarquee />
         <section id="work" className="relative pt-32 pb-64 bg-zinc-50/50">
           <div className="max-w-7xl mx-auto px-6 md:px-12 mb-24"><CreativeProjectHeader theme={theme} /></div>
-          {PROJECTS.map((project, i) => { const targetScale = 1 - ( (PROJECTS.length - i) * 0.05 ); return <StackingCard key={i} project={project} index={i} range={[i * 0.25, 1]} targetScale={targetScale} progress={scrollYProgress} setIndex={setActiveProjectIndex} onExpand={setSelectedProject} theme={theme} /> })}
+          {/* OPTIMIZATION: Pass isMobile prop */}
+          {PROJECTS.map((project, i) => { const targetScale = 1 - ( (PROJECTS.length - i) * 0.05 ); return <StackingCard key={i} project={project} index={i} range={[i * 0.25, 1]} targetScale={targetScale} progress={scrollYProgress} setIndex={setActiveProjectIndex} onExpand={setSelectedProject} theme={theme} isMobile={isMobile} /> })}
         </section>
         <section className="relative bg-white py-32 border-t border-zinc-100 overflow-hidden">
           <div className="max-w-7xl mx-auto px-6 md:px-12 mb-16"><RoughNotationGroup show={true}><SplitText className={`text-4xl font-bold tracking-tight mb-6 text-black ${manrope.className}`}>Technical Arsenal</SplitText><p className="text-sm text-zinc-500 uppercase tracking-widest font-bold">Core Competencies (<Blueprint type="circle" color={theme.rough} show={true}>Drag to throw</Blueprint>)</p></RoughNotationGroup></div>
