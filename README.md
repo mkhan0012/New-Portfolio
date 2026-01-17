@@ -1,6 +1,5 @@
 # ⚡ Moshin.dev - Interactive 3D Portfolio
 
-![Portfolio Preview](public/og-image.png)
 
 > **"An engineering-focused creative developer building high-performance digital architecture."**
 
