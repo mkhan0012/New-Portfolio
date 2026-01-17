@@ -64,7 +64,7 @@ const PROJECTS = [
   { id: "02", title: "Truth", category: "Art", desc: "A thought-provoking concept exploring perspectives where perception can matter more than objective truth.", link: "https://truthis-optional.vercel.app/", color: "bg-purple-600", img: "/truth.png", tags: ["Three.js", "OpenAI", "Next.js"] },
   { id: "03", title: "Arguely", category: "Social", desc: "An AI-powered platform that helps structure, analyze, and strengthen arguments with logical clarity.", link: "https://debate-again.vercel.app/", color: "bg-emerald-600", img: "/Arguely.png", tags: ["OpenAI", "Next.js", "Tailwind", "Framer"] },
   { id: "04", title: "FocusBits", category: "Productivity", desc: "A focus-driven productivity system that breaks goals into small, actionable bits.", link: "https://timer-rho-khaki.vercel.app/", color: "bg-orange-600", img: "/timer.png", tags: ["Web Audio", "API"] },
-  { id: "05", title: "Framework", category: "System", desc: "A structured foundation that simplifies building, scaling, and maintaining applications.", link: "https://framework-seven-steel.vercel.app/", color: "bg-zinc-800", img: "/framework.png", tags: ["Storybook", "GroqSDK"] },
+  { id: "05", title: "Framwork", category: "System", desc: "A structured foundation that simplifies building, scaling, and maintaining applications.", link: "https://framework-seven-steel.vercel.app/", color: "bg-zinc-800", img: "/framework.png", tags: ["Storybook", "GroqSDK"] },
   { id: "06", title: "MindScribe", category: "AI", desc: "An intelligent writing companion that turns thoughts into clear, expressive content.", link: "https://notes-chi-olive.vercel.app", color: "bg-indigo-600", img: "/notes.png", tags: ["OpenAI", "Notes", "API"] }
 ];
 
@@ -345,7 +345,7 @@ function StackingCard({ project, index, range, targetScale, progress, setIndex, 
 
 function SpotifyStatus({ theme }: { theme: any }) {
   return (
-    <div className="flex items-center gap-4 mt-12 md:mt-0 p-4 border border-zinc-100  backdrop-blur-md rounded-2xl w-fit">
+    <div className="flex items-center gap-4 mt-6 md:mt-0 p-4 border border-zinc-100  backdrop-blur-md rounded-2xl w-full md:w-fit">
       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.accent} text-white shadow-lg`}><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.48.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141 4.38-1.38 9.841-.72 13.441 1.56.419.24.6.84.3 1.26zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" /></svg></div>
       <div className="flex flex-col"><span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-1">Now Playing</span><div className="flex items-center gap-3"><div className="flex gap-[3px] items-end h-3"><span className={`w-1 rounded-full ${theme.accent} animate-[bounce_1s_infinite]`} style={{ height: '60%' }} /><span className={`w-1 rounded-full ${theme.accent} animate-[bounce_1.5s_infinite]`} style={{ height: '100%' }} /><span className={`w-1 rounded-full ${theme.accent} animate-[bounce_0.8s_infinite]`} style={{ height: '40%' }} /><span className={`w-1 rounded-full ${theme.accent} animate-[bounce_1.2s_infinite]`} style={{ height: '80%' }} /></div><a href="https://open.spotify.com" target="_blank" className={`text-xs font-bold ${theme.text} hover:underline truncate max-w-[150px]`}>Starboy - The Weeknd</a></div></div>
     </div>
@@ -354,9 +354,24 @@ function SpotifyStatus({ theme }: { theme: any }) {
 
 function Footer({ theme, onCopy }: { theme: any, onCopy: () => void }) {
   return (
-    <div className="fixed bottom-0 h-[80vh] w-full bg-black text-white z-0 flex flex-col justify-between p-12 md:p-24" style={{ clipPath: "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)" }}>
-      <div className="flex justify-between items-start"><h2 className={`text-[12vw] leading-[0.8] font-black tracking-tighter ${manrope.className}`}>LET'S<br /><span className={theme.text}>TALK</span></h2><div className="hidden md:flex flex-col gap-4 text-right"><a href="https://www.linkedin.com/in/md-moshin-khan-65510a24b" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors">LinkedIn ↗</a><a href="https://github.com/mkhan0012" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors">GitHub ↗</a></div></div>
-      <div className="flex flex-col md:flex-row justify-between items-end gap-10"><div className="flex flex-col gap-6"><div><p className="text-zinc-500 uppercase tracking-widest text-xs mb-2">Got a project?</p><Magnetic><button onClick={onCopy} className={`text-2xl md:text-4xl font-bold ${theme.text} transition-colors border-b border-zinc-800 pb-2`}>moshink0786@gmail.com</button></Magnetic></div><SpotifyStatus theme={theme} /></div><p className="text-zinc-600 text-xs font-bold uppercase tracking-widest">© 2025 Md Moshin Khan</p></div>
+    <div className="fixed bottom-0 h-[80vh] w-full bg-black text-white z-0 flex flex-col justify-between p-6 md:p-24" style={{ clipPath: "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)" }}>
+      <div className="flex flex-col md:flex-row justify-between items-start w-full">
+        <h2 className={`text-[12vw] leading-[0.8] font-black tracking-tighter ${manrope.className}`}>LET'S<br /><span className={theme.text}>TALK</span></h2>
+        <div className="flex md:flex-col gap-4 text-left md:text-right mt-8 md:mt-0">
+          <a href="https://www.linkedin.com/in/md-moshin-khan-65510a24b" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors">LinkedIn ↗</a>
+          <a href="https://github.com/mkhan0012" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors">GitHub ↗</a>
+        </div>
+      </div>
+      <div className="flex flex-col md:flex-row justify-between items-end gap-10 w-full">
+        <div className="flex flex-col gap-6 w-full md:w-auto">
+          <div>
+            <p className="text-zinc-500 uppercase tracking-widest text-xs mb-2">Got a project?</p>
+            <Magnetic><button onClick={onCopy} className={`text-xl md:text-4xl font-bold ${theme.text} transition-colors border-b border-zinc-800 pb-2 break-all md:break-normal`}>moshink0786@gmail.com</button></Magnetic>
+          </div>
+          <SpotifyStatus theme={theme} />
+        </div>
+        <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest w-full md:w-auto text-left md:text-right">© 2025 Md Moshin Khan</p>
+      </div>
     </div>
   )
 }
@@ -371,17 +386,18 @@ function Header({ theme }: { theme: any }) {
         <span className="text-xs text-zinc-500 font-medium tracking-widest mt-1"><HyperText text="FULL STACK ENGINEER" /></span>
       </div>
 
-      <div className="hidden md:flex flex-col items-end text-xs font-medium tracking-widest text-zinc-500 uppercase pointer-events-auto">
+      <div className="flex flex-col items-end text-xs font-medium tracking-widest text-zinc-500 uppercase pointer-events-auto">
         <div className="flex items-center gap-4 mb-2 text-zinc-400">
           <a href="https://github.com/mkhan0012" target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors">GitHub</a>
           <a href="https://www.linkedin.com/in/md-moshin-khan-65510a24b" target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors">LinkedIn</a>
         </div>
-        <span className="flex items-center gap-2">
-          {/* SONAR DOT */}
-          <span className={`relative w-2 h-2 ${theme.accent} rounded-full sonar-effect`} />
-          Available for Work
-        </span>
-        <span className="mt-1">{time}</span><span>Rajgangpur, India</span>
+        <div className="hidden md:flex flex-col items-end">
+          <span className="flex items-center gap-2">
+            <span className={`relative w-2 h-2 ${theme.accent} rounded-full sonar-effect`} />
+            Available for Work
+          </span>
+          <span className="mt-1">{time}</span><span>Rajgangpur, India</span>
+        </div>
       </div>
     </header>
   );
