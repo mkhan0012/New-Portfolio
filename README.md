@@ -85,5 +85,4 @@ src/
 │   ├── globals.css      # Tailwind v4 & Custom Animations (Glitch, Neon, Shimmer)
 │   ├── layout.tsx       # Root layout & Metadata
 │   └── page.tsx         # Main interactive logic (Physics, 3D, Animations)
-├── components/          # (Architectural pattern for modularity)
 └── public/              # Static assets (images, resumes, icons)
