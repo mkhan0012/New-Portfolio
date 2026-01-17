@@ -64,7 +64,7 @@ const PROJECTS = [
   { id: "02", title: "Truth", category: "Art", desc: "A thought-provoking concept exploring perspectives where perception can matter more than objective truth.", link: "https://truthis-optional.vercel.app/", color: "bg-purple-600", img: "/truth.png", tags: ["Three.js", "OpenAI", "Next.js"] },
   { id: "03", title: "Arguely", category: "Social", desc: "An AI-powered platform that helps structure, analyze, and strengthen arguments with logical clarity.", link: "https://debate-again.vercel.app/", color: "bg-emerald-600", img: "/Arguely.png", tags: ["OpenAI", "Next.js", "Tailwind", "Framer"] },
   { id: "04", title: "FocusBits", category: "Productivity", desc: "A focus-driven productivity system that breaks goals into small, actionable bits.", link: "https://timer-rho-khaki.vercel.app/", color: "bg-orange-600", img: "/timer.png", tags: ["Web Audio", "API"] },
-  { id: "05", title: "Framwork", category: "System", desc: "A structured foundation that simplifies building, scaling, and maintaining applications.", link: "https://framework-seven-steel.vercel.app/", color: "bg-zinc-800", img: "/framework.png", tags: ["Storybook", "GroqSDK"] },
+  { id: "05", title: "Framework", category: "System", desc: "A structured foundation that simplifies building, scaling, and maintaining applications.", link: "https://framework-seven-steel.vercel.app/", color: "bg-zinc-800", img: "/framework.png", tags: ["Storybook", "GroqSDK"] },
   { id: "06", title: "MindScribe", category: "AI", desc: "An intelligent writing companion that turns thoughts into clear, expressive content.", link: "https://notes-chi-olive.vercel.app", color: "bg-indigo-600", img: "/notes.png", tags: ["OpenAI", "Notes", "API"] }
 ];
 
