@@ -186,6 +186,43 @@
     animation: rgbShift 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
   }
 
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: black;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+  ::selection {
+    background: #a3e635;
+    color: black;
+  }
+
+  body {
+    cursor: auto;
+  }
+
+  @media (min-width: 768px) {
+    body {
+      cursor: none;
+    }
+  }
+
+  /* Mobile Tap Highlight Fix */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   @keyframes rgbShift {
     0% {
       transform: translate(0) scale(1);
@@ -216,5 +253,6 @@
       transform: translate(0) scale(1.05);
       filter: drop-shadow(0 0 0 transparent);
     }
+
   }
 }

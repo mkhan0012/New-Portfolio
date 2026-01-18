@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useEffect, useState, ReactElement, cloneElement } from "react";
+import { useRef, useEffect, useState, ReactElement, cloneElement, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Stars, MeshDistortMaterial, Sphere } from "@react-three/drei";
+import { Float, Stars } from "@react-three/drei";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import Lenis from "@studio-freight/lenis";
 import { Inter, Manrope, JetBrains_Mono } from "next/font/google";
@@ -59,6 +59,13 @@ const GlobalStyles = () => (
     ::selection { background: #a3e635; color: black; }
     body { cursor: auto; }
     @media (min-width: 768px) { body { cursor: none; } }
+    * { -webkit-tap-highlight-color: transparent; }
+    
+    html.lenis, html.lenis body { height: auto; }
+    .lenis.lenis-smooth { scroll-behavior: auto !important; }
+    .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+    .lenis.lenis-stopped { overflow: hidden; }
+    .lenis.lenis-scrolling iframe { pointer-events: none; }
   `}</style>
 );
 
@@ -85,11 +92,10 @@ const HyperText = ({ text, className }: { text: string, className?: string }) =>
 
 // --- COMPONENTS ---
 
-// FIXED: Defined CreativeProjectHeader globally to avoid reference errors
 function CreativeProjectHeader({ theme }: { theme: any }) {
   return (
-    <div className="relative flex flex-col items-center justify-center mb-24 md:mb-32">
-      <div className="relative overflow-hidden">
+    <div className="relative flex flex-col items-center justify-center mb-20 md:mb-32">
+      <div className="relative overflow-hidden w-full px-4">
         <h2 className={`text-4xl md:text-8xl font-black tracking-tighter text-center text-outline-bold opacity-30 select-none ${manrope.className}`}>SELECTED PROJECTS</h2>
         <motion.div initial={{ height: "0%" }} whileInView={{ height: "100%" }} transition={{ duration: 1.5, ease: [0.76, 0, 0.24, 1] }} className="absolute top-0 left-0 w-full overflow-hidden">
           <h2 className={`text-4xl md:text-8xl font-black tracking-tighter text-center text-black ${manrope.className}`}>SELECTED PROJECTS</h2>
@@ -105,56 +111,53 @@ function CreativeProjectHeader({ theme }: { theme: any }) {
   );
 }
 
-// FIXED: Blueprint with better padding logic for perfect alignment
 const Blueprint = ({ children, type, color, show }: { children: React.ReactNode, type: "underline" | "box" | "circle" | "highlight" | "strike-through" | "crossed-off" | "bracket", color: string, show: boolean }) => (
-  <RoughNotation
-    type={type}
-    color={color}
-    show={show}
-    animationDuration={1500}
-    strokeWidth={2}
-    // Precise padding: Circle needs space [vertical, horizontal], Underline needs tight fit
-    padding={type === 'circle' ? [8, 10] : [2, 2]}
-    iterations={2}
-    multiline={true}
-  >
-    <span className={type === 'circle' ? "inline-block whitespace-nowrap" : "relative z-10"}>
-      {children}
-    </span>
+  <RoughNotation type={type} color={color} show={show} animationDuration={1500} strokeWidth={2} padding={type === 'circle' ? [8, 10] : [2, 2]} iterations={2} multiline={true}>
+    <span className={type === 'circle' ? "inline-block whitespace-nowrap" : "relative z-10"}>{children}</span>
   </RoughNotation>
 )
 
-// FIXED: HeroSection with Canvas inside to ensure 3D model appears
-const HeroSection = ({ theme, setCursorVariant }: { theme: any, setCursorVariant: any }) => {
+const HeroSection = ({ theme, setCursorVariant, isMobile }: { theme: any, setCursorVariant: any, isMobile: boolean }) => {
   return (
     <section className="relative h-screen w-full flex flex-col justify-center items-center px-4 overflow-hidden">
-      {/* 3D LAYER - Restored & Aligned */}
       <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
-        <Canvas camera={{ position: [0, 0, 5] }}>
-          <GeometricCore theme={theme} />
+        <Canvas camera={{ position: [0, 0, 5] }} dpr={isMobile ? [1, 1] : [1, 1.5]} gl={{ antialias: false, powerPreference: "high-performance" }}>
+          <GeometricCore theme={theme} isMobile={isMobile} />
         </Canvas>
       </div>
 
-      <div className="relative z-10 text-center">
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-gradient-to-r from-orange-200/40 via-lime-200/40 to-violet-200/40 blur-[120px] -z-10" />
+      <div className="relative z-10 text-center w-full max-w-[90vw]">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[500px] h-[300px] bg-gradient-to-r from-orange-200/40 via-lime-200/40 to-violet-200/40 blur-[80px] md:blur-[120px] -z-10" />
 
-        <div className="hero-fade"><h2 className="text-xs md:text-sm font-bold tracking-[0.4em] text-zinc-400 uppercase mb-6">Portfolio · 2025</h2></div>
+        <div className="hero-fade"><h2 className="text-[10px] md:text-sm font-bold tracking-[0.4em] text-zinc-400 uppercase mb-4 md:mb-6">Portfolio · 2025</h2></div>
 
-        <div className="overflow-hidden leading-[0.85]">
+        <div className="overflow-hidden leading-[0.9] md:leading-[0.85]">
           <h1 className={`text-[13vw] md:text-[9rem] font-black tracking-tighter text-black ${manrope.className}`}>
             <div className="hero-glitch-text flex justify-center overflow-hidden"><span className="glitch-wrapper" data-text="MD MOSHIN">MD MOSHIN</span></div>
             <div className="hero-glitch-text flex justify-center overflow-hidden"><span className="glitch-wrapper" data-text="KHAN">KHAN</span></div>
           </h1>
         </div>
 
-        <div className="hero-fade mt-10 flex flex-col items-center justify-center">
-          <p className="text-zinc-500 max-w-md text-sm md:text-base leading-relaxed font-medium">
+        <div className="hero-fade mt-8 md:mt-10 flex flex-col items-center justify-center">
+          <p className="text-zinc-500 max-w-[90%] md:max-w-md text-xs md:text-base leading-relaxed font-medium">
             An engineering-focused <Blueprint type="highlight" color={theme.rough + "33"} show={true}>creative developer</Blueprint> building <Blueprint type="underline" color={theme.rough} show={true}>high-performance</Blueprint> digital architecture.
           </p>
-          <div className="flex flex-col md:flex-row gap-4 mt-8 items-center">
-            <Magnetic><button onMouseEnter={() => setCursorVariant('hover')} onMouseLeave={() => setCursorVariant('default')} onClick={() => document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' })} className={`px-8 py-4 bg-black text-white rounded-full font-bold text-xs uppercase tracking-widest ${theme.hover} hover:text-black transition-colors`}>Explore Works</button></Magnetic>
+          <div className="flex flex-col md:flex-row gap-4 mt-8 items-center w-full md:w-auto px-6 md:px-0">
             <Magnetic>
-              <a href="/resume.pdf" download="Md_Moshin_Khan_Resume" onMouseEnter={() => setCursorVariant('hover')} onMouseLeave={() => setCursorVariant('default')} className="relative overflow-hidden px-8 py-4 border border-zinc-200 rounded-full font-bold text-xs uppercase tracking-widest text-zinc-500 hover:text-black hover:border-black transition-colors bg-white group"><span className="relative z-10">Download CV</span><div className="animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-300" /></a>
+              <button
+                onMouseEnter={() => setCursorVariant('hover')}
+                onMouseLeave={() => setCursorVariant('default')}
+                onClick={() => document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' })}
+                className={`w-full md:w-auto px-8 py-4 bg-black text-white rounded-full font-bold text-xs uppercase tracking-widest ${theme.hover} hover:text-black transition-all active:scale-95`}
+              >
+                Explore Works
+              </button>
+            </Magnetic>
+            <Magnetic>
+              <a href="/resume.pdf" download="Md_Moshin_Khan_Resume" onMouseEnter={() => setCursorVariant('hover')} onMouseLeave={() => setCursorVariant('default')} className="w-full md:w-auto flex justify-center relative overflow-hidden px-8 py-4 border border-zinc-200 rounded-full font-bold text-xs uppercase tracking-widest text-zinc-500 hover:text-black hover:border-black transition-all bg-white group active:scale-95">
+                <span className="relative z-10">Download CV</span>
+                <div className="animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </a>
             </Magnetic>
           </div>
         </div>
@@ -163,8 +166,7 @@ const HeroSection = ({ theme, setCursorVariant }: { theme: any, setCursorVariant
   );
 };
 
-// --- RESTORED WIREFRAME CORE ---
-function GeometricCore({ theme }: { theme: any }) {
+function GeometricCore({ theme, isMobile }: { theme: any, isMobile: boolean }) {
   const mesh = useRef<THREE.Mesh>(null);
   const colorMap: any = { "bg-orange-500": "#f97316", "bg-lime-400": "#a3e635", "bg-violet-500": "#8b5cf6", "bg-yellow-400": "#fbbf24" };
 
@@ -172,33 +174,21 @@ function GeometricCore({ theme }: { theme: any }) {
 
   return (
     <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-      {/* Centered with slight Y offset to sit perfectly behind text */}
-      <mesh ref={mesh} scale={2.2} position={[0, -0.2, 0]}>
+      <mesh ref={mesh} scale={isMobile ? 1.5 : 2.2} position={[0, -0.2, 0]}>
         <icosahedronGeometry args={[1, 1]} />
-        <meshBasicMaterial color={colorMap[theme.accent] || "#a3e635"} wireframe wireframeLinewidth={2} />
+        <meshBasicMaterial color={colorMap[theme.accent] || "#a3e635"} wireframe wireframeLinewidth={isMobile ? 1 : 2} />
       </mesh>
-      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+      <Stars radius={100} depth={50} count={isMobile ? 500 : 5000} factor={4} saturation={0} fade speed={1} />
       <fog attach="fog" args={['#ffffff', 5, 25]} />
     </Float>
   );
-}
-
-function Cable() {
-  const path = useRef<SVGPathElement>(null);
-  useEffect(() => {
-    let progress = 0; let time = Math.PI / 2;
-    const animate = () => { progress = progress * 0.975; time += 0.2; path.current?.setAttributeNS(null, "d", `M0 250 Q${window.innerWidth * 0.5} ${250 + progress * Math.sin(time)} ${window.innerWidth} 250`); requestAnimationFrame(animate); };
-    const move = (e: MouseEvent) => { progress += e.movementY * 0.5; };
-    window.addEventListener("mousemove", move); animate(); return () => window.removeEventListener("mousemove", move);
-  }, []);
-  return <div className="hidden md:block absolute top-0 w-full h-[500px] pointer-events-none z-0 opacity-20"><svg className="w-full h-full"><path ref={path} stroke="currentColor" strokeWidth="2" fill="none" className="text-zinc-400" /></svg></div>;
 }
 
 function DynamicIsland({ message, visible }: { message: string, visible: boolean }) {
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div initial={{ y: -100, scale: 0.8, opacity: 0 }} animate={{ y: 20, scale: 1, opacity: 1 }} exit={{ y: -100, scale: 0.8, opacity: 0 }} className="fixed top-0 left-1/2 -translate-x-1/2 z-[200] bg-black text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-2xl min-w-[200px] justify-center">
+        <motion.div initial={{ y: -100, scale: 0.8, opacity: 0 }} animate={{ y: 20, scale: 1, opacity: 1 }} exit={{ y: -100, scale: 0.8, opacity: 0 }} className="fixed top-0 left-1/2 -translate-x-1/2 z-[200] bg-black text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-2xl min-w-[200px] justify-center mt-safe">
           <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
           <span className={`text-sm font-bold tracking-tight ${manrope.className}`}>{message}</span>
         </motion.div>
@@ -225,6 +215,7 @@ const HackerMode = () => {
 const GravityArsenal = ({ theme }: { theme: any }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const elementsRef = useRef<(HTMLDivElement | null)[]>([]);
+
   useEffect(() => {
     if (typeof window !== "undefined" && window.innerWidth < 768) return;
     if (!containerRef.current) return;
@@ -241,11 +232,12 @@ const GravityArsenal = ({ theme }: { theme: any }) => {
     const updateLoop = () => { techBodies.forEach((body, i) => { const el = elementsRef.current[i]; if (el) el.style.transform = `translate(${body.position.x - el.offsetWidth / 2}px, ${body.position.y - el.offsetHeight / 2}px) rotate(${body.angle}rad)`; }); requestAnimationFrame(updateLoop); }; updateLoop();
     return () => { Runner.stop(runner); Engine.clear(engine); World.clear(world, false); };
   }, []);
+
   return (
     <div ref={containerRef} className="relative w-full min-h-[400px] md:h-[600px] bg-zinc-50 border-y border-zinc-200 overflow-hidden cursor-grab active:cursor-grabbing flex flex-wrap items-center justify-center gap-3 p-6 md:block touch-pan-y">
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none"><h3 className={`text-[10vw] font-black text-zinc-100 ${manrope.className} uppercase tracking-tighter opacity-60 md:opacity-100`}>Playground</h3></div>
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none"><h3 className={`text-[12vw] md:text-[10vw] font-black text-zinc-100 ${manrope.className} uppercase tracking-tighter opacity-60 md:opacity-100`}>Playground</h3></div>
       {TECH_ITEMS.map((item, i) => (
-        <div key={i} ref={(el) => { elementsRef.current[i] = el }} className={`relative md:absolute md:top-0 md:left-0 px-6 py-3 bg-white border-2 border-black rounded-full text-sm font-bold uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] select-none neon-chip ${theme.hover}`}>
+        <div key={i} ref={(el) => { elementsRef.current[i] = el }} className={`relative md:absolute md:top-0 md:left-0 px-4 py-2 md:px-6 md:py-3 bg-white border md:border-2 border-black rounded-full text-xs md:text-sm font-bold uppercase tracking-widest shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] select-none neon-chip ${theme.hover} transition-transform active:scale-95 md:active:scale-100`}>
           {item}
         </div>
       ))}
@@ -261,26 +253,37 @@ function InfiniteMarquee() {
     const animate = () => { if (xPercent <= -100) xPercent = 0; gsap.set(firstText.current, { xPercent }); gsap.set(secondText.current, { xPercent }); xPercent -= 0.05; requestAnimationFrame(animate); };
     requestAnimationFrame(animate);
   }, []);
-  return (<div className="relative flex overflow-hidden py-16 bg-black text-white border-t border-b border-zinc-800 z-20"><div className="relative whitespace-nowrap flex"><p ref={firstText} className={`text-[8vw] font-bold uppercase tracking-tighter leading-none pr-12 ${manrope.className}`}>Available for Freelance • Full Stack Engineer • </p><p ref={secondText} className={`absolute left-full top-0 text-[8vw] font-bold uppercase tracking-tighter leading-none pr-12 ${manrope.className}`}>Available for Freelance • Full Stack Engineer • </p></div></div>)
+  return (<div className="relative flex overflow-hidden py-8 md:py-16 bg-black text-white border-t border-b border-zinc-800 z-20"><div className="relative whitespace-nowrap flex"><p ref={firstText} className={`text-[12vw] md:text-[8vw] font-bold uppercase tracking-tighter leading-none pr-12 ${manrope.className}`}>Available for Freelance • Full Stack Engineer • </p><p ref={secondText} className={`absolute left-full top-0 text-[12vw] md:text-[8vw] font-bold uppercase tracking-tighter leading-none pr-12 ${manrope.className}`}>Available for Freelance • Full Stack Engineer • </p></div></div>)
 }
 
 function Preloader({ onComplete, theme }: { onComplete: () => void, theme: any }) {
   const [count, setCount] = useState(0);
   const curtainRef = useRef(null);
-  useEffect(() => { const interval = setInterval(() => { setCount((prev) => { if (prev >= 100) { clearInterval(interval); return 100; } return prev + 1; }); }, 20); if (count === 100) gsap.to(curtainRef.current, { y: "-100%", duration: 1.2, ease: "power4.inOut", delay: 0.5, onComplete: onComplete }); return () => clearInterval(interval); }, [count, onComplete]);
-  return (<div ref={curtainRef} className={`fixed inset-0 bg-black z-[10000] flex items-end justify-start p-10 md:p-20 ${theme.text}`}><div className="flex flex-col"><span className={`text-[15vw] leading-[0.8] font-black tracking-tighter ${manrope.className}`}>{count}%</span><span className="text-xs uppercase tracking-widest mt-4 opacity-50">System Initializing...</span></div></div>);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCount((prev) => {
+        if (prev >= 100) { clearInterval(interval); return 100; }
+        return prev + 1;
+      });
+    }, 15);
+
+    if (count === 100) gsap.to(curtainRef.current, { y: "-100%", duration: 1.2, ease: "power4.inOut", delay: 0.2, onComplete: onComplete });
+    return () => clearInterval(interval);
+  }, [count, onComplete]);
+
+  return (<div ref={curtainRef} className={`fixed inset-0 bg-black z-[10000] flex items-end justify-start p-6 md:p-20 ${theme.text}`}><div className="flex flex-col"><span className={`text-[20vw] md:text-[15vw] leading-[0.8] font-black tracking-tighter ${manrope.className}`}>{count}%</span><span className="text-xs uppercase tracking-widest mt-4 opacity-50">System Initializing...</span></div></div>);
 }
 
 function InteractiveGrid({ theme }: { theme: any }) {
   const mask = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    if (window.innerWidth < 768) return;
     if (!mask.current) return;
     const xTo = gsap.quickTo(mask.current, "x", { duration: 0.5, ease: "power2.out" });
     const yTo = gsap.quickTo(mask.current, "y", { duration: 0.5, ease: "power2.out" });
     const moveMask = (e: MouseEvent) => { xTo(e.clientX); yTo(e.clientY); };
     window.addEventListener("mousemove", moveMask); return () => window.removeEventListener("mousemove", moveMask);
   }, []);
-  // Hidden on mobile
   return (<div className="hidden md:block fixed inset-0 z-0 pointer-events-none"><div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:40px_40px]" /><div ref={mask} className={`absolute w-[600px] h-[600px] rounded-full ${theme.accent} blur-[100px] opacity-10 -translate-x-1/2 -translate-y-1/2 will-change-transform mix-blend-multiply`} /></div>);
 }
 
@@ -290,7 +293,7 @@ function CustomCursor({ variant }: { variant: string }) {
   const follower = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (window.innerWidth < 768) return; // Disable on mobile
+    if (window.innerWidth < 768) return;
     if (!cursor.current || !follower.current) return;
     const xTo = gsap.quickTo(cursor.current, "x", { duration: 0.1, ease: "power3.out" });
     const yTo = gsap.quickTo(cursor.current, "y", { duration: 0.1, ease: "power3.out" });
@@ -331,6 +334,7 @@ function CustomCursor({ variant }: { variant: string }) {
 // --- CLICK RIPPLE ---
 function ClickRipple() {
   useEffect(() => {
+    if (window.innerWidth < 768) return;
     const handleClick = (e: MouseEvent) => {
       const ripple = document.createElement("div");
       ripple.className = "fixed rounded-full border border-black/20 z-[9997] pointer-events-none animate-ripple";
@@ -378,11 +382,11 @@ function StackingCard({ project, index, range, targetScale, progress, setIndex, 
   const { scrollYProgress } = useScroll({ target: container, offset: ['start end', 'start start'] });
   const scale = useTransform(progress, range, [1, targetScale]);
   const blur = useTransform(progress, range, [0, 4]);
-  const y = useTransform(scrollYProgress, [0, 1], [-50, 50]);
+  const y = useTransform(scrollYProgress, [0, 1], isMobile ? [-20, 20] : [-50, 50]);
 
   const cardRef = useRef<HTMLDivElement>(null);
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
+    if (isMobile || !cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     cardRef.current.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
     cardRef.current.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
@@ -392,27 +396,29 @@ function StackingCard({ project, index, range, targetScale, progress, setIndex, 
     <div ref={container} className="h-screen flex items-center justify-center sticky top-0">
       <motion.div
         ref={cardRef} onMouseMove={handleMouseMove} style={{ scale, top: `calc(-5vh + ${index * 25}px)`, filter: `blur(${blur}px)` }}
-        className="relative flex flex-col md:flex-row h-[60vh] md:h-[500px] w-full max-w-6xl rounded-3xl p-6 md:p-12 border border-black/10 bg-white shadow-2xl origin-top overflow-hidden group/card"
+        className="relative flex flex-col md:flex-row h-[70vh] md:h-[500px] w-full max-w-6xl rounded-2xl md:rounded-3xl p-6 md:p-12 border border-black/10 bg-white shadow-2xl origin-top overflow-hidden group/card"
         onMouseEnter={() => { setIndex(index); setLog(`>> DETECTED: ${project.title.toUpperCase()}`); }}
         onMouseLeave={() => setLog(">> SYSTEM: IDLE")}
       >
-        <div className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition duration-300 group-hover/card:opacity-100" style={{ background: `radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(0,0,0,0.06), transparent 40%)` }} />
-        <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-black/10 group-hover/card:ring-black/30 transition-all duration-500" />
+        <div className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition duration-300 group-hover/card:opacity-100 hidden md:block" style={{ background: `radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(0,0,0,0.06), transparent 40%)` }} />
 
         <div className="flex flex-col md:flex-row h-full gap-6 md:gap-10 w-full relative z-10">
-          <div className="w-full md:w-[40%] flex flex-col justify-between z-10">
+          <div className="w-full md:w-[40%] flex flex-col justify-between z-10 order-2 md:order-1">
             <div>
               <div className="flex items-center gap-4 mb-4 md:mb-8">
                 <span className={`text-sm font-bold ${theme.text} ${inter.className}`}>0{index + 1}</span>
                 <span className="px-3 py-1 border border-zinc-200 rounded-full text-[10px] font-bold uppercase tracking-widest text-zinc-400"><HyperText text={project.category} /></span>
               </div>
-              <h2 className={`text-2xl md:text-5xl font-bold leading-tight mb-2 md:mb-6 ${manrope.className}`}>{project.title}</h2>
-              <p className="text-zinc-500 text-xs md:text-sm leading-relaxed">{project.desc}</p>
+              <h2 className={`text-3xl md:text-5xl font-bold leading-tight mb-4 md:mb-6 ${manrope.className}`}>{project.title}</h2>
+              <p className="text-zinc-500 text-sm leading-relaxed line-clamp-3 md:line-clamp-none">{project.desc}</p>
             </div>
-            <div className="flex flex-col gap-6"><div className="flex gap-2 flex-wrap">{project.tags.map((tag: string) => (<span key={tag} className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 bg-zinc-100 px-3 py-1 rounded-full">{tag}</span>))}</div><Magnetic><a href={project.link} target="_blank" onMouseEnter={() => setCursorVariant('hover')} onMouseLeave={() => setCursorVariant('default')} className={`inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest ${theme.text} transition-colors cursor-pointer w-fit hover:opacity-70`}>Live Site <span className="text-lg">↗</span></a></Magnetic></div>
+            <div className="flex flex-col gap-6 mt-6 md:mt-0">
+              <div className="flex gap-2 flex-wrap">{project.tags.map((tag: string) => (<span key={tag} className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 bg-zinc-100 px-3 py-1 rounded-full">{tag}</span>))}</div>
+              <Magnetic><a href={project.link} target="_blank" onMouseEnter={() => setCursorVariant('hover')} onMouseLeave={() => setCursorVariant('default')} className={`inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest ${theme.text} transition-colors cursor-pointer w-fit hover:opacity-70 px-4 py-2 md:px-0 md:py-0 bg-zinc-50 md:bg-transparent rounded-lg md:rounded-none`}>Live Site <span className="text-lg">↗</span></a></Magnetic>
+            </div>
           </div>
           <div
-            className="relative w-full md:w-[60%] h-full rounded-2xl overflow-hidden bg-zinc-100 group cursor-none"
+            className="relative w-full md:w-[60%] h-[200px] md:h-full rounded-xl md:rounded-2xl overflow-hidden bg-zinc-100 group cursor-none order-1 md:order-2"
             onClick={() => onExpand(project)}
             onMouseEnter={() => setCursorVariant('view')}
             onMouseLeave={() => setCursorVariant('default')}
@@ -432,7 +438,6 @@ function StackingCard({ project, index, range, targetScale, progress, setIndex, 
   )
 }
 
-// --- ADVANCED COMMAND CENTER (REAL DATA) ---
 function CommandCenter({ theme }: { theme: any }) {
   const [sessionID, setSessionID] = useState("INIT");
   const [ping, setPing] = useState(0);
@@ -443,7 +448,7 @@ function CommandCenter({ theme }: { theme: any }) {
     setSessionID(Math.random().toString(36).substring(2, 8).toUpperCase());
     const interval = setInterval(() => { setPing(Math.floor(Math.random() * 15) + 20); }, 2000);
 
-    if ('getBattery' in navigator) {
+    if (typeof navigator !== 'undefined' && 'getBattery' in navigator) {
       (navigator as any).getBattery().then((batt: any) => {
         const updateBatt = () => { setBattery({ level: Math.round(batt.level * 100), charging: batt.charging }); };
         updateBatt();
@@ -451,7 +456,7 @@ function CommandCenter({ theme }: { theme: any }) {
         batt.addEventListener('chargingchange', updateBatt);
       });
     }
-    if ((navigator as any).connection) {
+    if (typeof navigator !== 'undefined' && (navigator as any).connection) {
       setConnection((navigator as any).connection.effectiveType?.toUpperCase() || "WIFI");
     }
     return () => clearInterval(interval);
@@ -485,24 +490,23 @@ function CommandCenter({ theme }: { theme: any }) {
 
 function Footer({ theme, onCopy }: { theme: any, onCopy: () => void }) {
   return (
-    // OPTIMIZATION: Height adjusted for mobile to prevent cutoff
-    <div className="fixed bottom-0 h-[50vh] md:h-[80vh] w-full bg-black text-white z-0 flex flex-col justify-between p-6 md:p-24 pb-safe" style={{ clipPath: "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)" }}>
-      <div className="flex flex-col md:flex-row justify-between items-start w-full">
-        <h2 className={`text-[22vw] md:text-[12vw] leading-[0.8] font-black tracking-tighter ${manrope.className}`}>LET'S<br /><span className={theme.text}>TALK</span></h2>
-        <div className="flex md:flex-col gap-4 text-left md:text-right mt-8 md:mt-0">
-          <a href="https://www.linkedin.com/in/md-moshin-khan-65510a24b" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors">LinkedIn ↗</a>
-          <a href="https://github.com/mkhan0012" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors">GitHub ↗</a>
+    <div className="fixed bottom-0 h-[85vh] md:h-[80vh] w-full bg-black text-white z-0 flex flex-col justify-between p-6 md:p-24 pb-20 md:pb-safe" style={{ clipPath: "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)" }}>
+      <div className="flex flex-col md:flex-row justify-between items-start w-full mt-10 md:mt-0">
+        <h2 className={`text-[20vw] md:text-[12vw] leading-[0.8] font-black tracking-tighter ${manrope.className}`}>LET'S<br /><span className={theme.text}>TALK</span></h2>
+        <div className="flex md:flex-col gap-6 md:gap-4 text-left md:text-right mt-8 md:mt-0 w-full md:w-auto">
+          <a href="https://www.linkedin.com/in/md-moshin-khan-65510a24b" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors border border-white/10 p-4 md:border-0 md:p-0 rounded-lg text-center md:text-right w-full md:w-auto">LinkedIn ↗</a>
+          <a href="https://github.com/mkhan0012" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white uppercase tracking-widest text-sm transition-colors border border-white/10 p-4 md:border-0 md:p-0 rounded-lg text-center md:text-right w-full md:w-auto">GitHub ↗</a>
         </div>
       </div>
-      <div className="flex flex-col md:flex-row justify-between items-end gap-10 w-full mt-10 md:mt-0 pb-20 md:pb-0">
+      <div className="flex flex-col md:flex-row justify-between items-end gap-10 w-full mt-10 md:mt-0">
         <div className="flex flex-col gap-6 w-full md:w-auto">
           <div>
             <p className="text-zinc-500 uppercase tracking-widest text-xs mb-2">Got a project?</p>
-            <Magnetic><button onClick={onCopy} className={`text-xl md:text-4xl font-bold ${theme.text} transition-colors border-b border-zinc-800 pb-2 break-all md:break-normal`}>moshink0786@gmail.com</button></Magnetic>
+            <Magnetic><button onClick={onCopy} className={`text-xl md:text-4xl font-bold ${theme.text} transition-colors border-b border-zinc-800 pb-2 break-all md:break-normal active:opacity-60`}>moshink0786@gmail.com</button></Magnetic>
           </div>
           <CommandCenter theme={theme} />
         </div>
-        <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest w-full md:w-auto text-left md:text-right">© 2025 Md Moshin Khan</p>
+        <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest w-full md:w-auto text-center md:text-right pb-4 md:pb-0">© 2025 Md Moshin Khan</p>
       </div>
     </div>
   )
@@ -512,16 +516,16 @@ function Header({ theme }: { theme: any }) {
   const [time, setTime] = useState("");
   useEffect(() => { const timer = setInterval(() => setTime(format(new Date(), "HH:mm:ss 'IST'")), 1000); return () => clearInterval(timer); }, []);
   return (
-    <header className="fixed top-0 left-0 w-full p-6 md:p-10 flex justify-between items-start z-50 pointer-events-none text-black bg-white/80 backdrop-blur-lg border-b border-white/20 transition-all duration-300">
+    <header className="fixed top-0 left-0 w-full p-4 md:p-10 flex justify-between items-start z-50 pointer-events-none text-black bg-white/80 backdrop-blur-lg border-b border-white/20 transition-all duration-300">
       <div className="flex flex-col items-start pointer-events-auto">
-        <h1 className={`text-xl font-bold tracking-tight ${manrope.className} text-black`}>MOSHIN.DEV</h1>
-        <span className="text-xs text-zinc-500 font-medium tracking-widest mt-1"><HyperText text="FULL STACK ENGINEER" /></span>
+        <h1 className={`text-lg md:text-xl font-bold tracking-tight ${manrope.className} text-black`}>MOSHIN.DEV</h1>
+        <span className="text-[10px] md:text-xs text-zinc-500 font-medium tracking-widest mt-1"><HyperText text="FULL STACK ENGINEER" /></span>
       </div>
 
       <div className="flex flex-col items-end text-xs font-medium tracking-widest text-zinc-500 uppercase pointer-events-auto">
         <div className="flex items-center gap-4 mb-2 text-zinc-400">
-          <a href="https://github.com/mkhan0012" target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors">GitHub</a>
-          <a href="https://www.linkedin.com/in/md-moshin-khan-65510a24b" target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors">LinkedIn</a>
+          <a href="https://github.com/mkhan0012" target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors hidden md:block">GitHub</a>
+          <a href="https://www.linkedin.com/in/md-moshin-khan-65510a24b" target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors hidden md:block">LinkedIn</a>
         </div>
         <div className="hidden md:flex flex-col items-end">
           <span className="flex items-center gap-2">
@@ -529,6 +533,9 @@ function Header({ theme }: { theme: any }) {
             Available for Work
           </span>
           <span className="mt-1">{time}</span><span>India</span>
+        </div>
+        <div className="md:hidden flex items-center gap-2">
+          <span className={`relative w-2 h-2 ${theme.accent} rounded-full sonar-effect`} />
         </div>
       </div>
     </header>
@@ -538,14 +545,6 @@ function Header({ theme }: { theme: any }) {
 const SplitText = ({ children, className }: { children: string, className?: string }) => {
   return <div className={className}><span className="sr-only">{children}</span><span aria-hidden="true">{children.split("").map((char, index) => (<span key={index} className="inline-block overflow-hidden align-top"><motion.span className="inline-block" initial={{ y: "100%" }} whileInView={{ y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.03, ease: [0.33, 1, 0.68, 1] }}>{char === " " ? "\u00A0" : char}</motion.span></span>))}</span></div>;
 };
-
-// --- MOBILE-ONLY SCROLL INDICATOR ---
-const ScrollIndicator = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2, duration: 1 }} className="absolute bottom-20 left-1/2 -translate-x-1/2 flex md:hidden flex-col items-center gap-2 z-20 pointer-events-none">
-    <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 font-bold">Scroll</span>
-    <motion.div animate={{ y: [0, 5, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="w-1 h-8 rounded-full bg-gradient-to-b from-black/0 via-black/50 to-black/0" />
-  </motion.div>
-);
 
 // --- MAIN PAGE ---
 export default function Home() {
@@ -564,8 +563,6 @@ export default function Home() {
   const { scrollYProgress, scrollY } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
-  // REMOVED VELOCITY SKEW TO FIX BLUR
-
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -581,8 +578,16 @@ export default function Home() {
     else setTheme(THEMES.hazard);
   }, []);
 
+  // --- SMOOTH SCROLL (LENIS) OPTIMIZATION ---
   useEffect(() => {
-    const lenis = new Lenis({ lerp: 0.08 });
+    const lenis = new Lenis({
+      lerp: 0.1,           // Increased from 0.08 for "snappier" feeling (less floaty/laggy)
+      duration: 1.5,       // Smooth glide duration
+      // smoothTouch: true is DEPRECATED and removed.
+      touchMultiplier: 2,  // Faster response on mobile touch
+      wheelMultiplier: 1,  // Standard speed on mouse wheel
+    });
+
     function raf(time: number) { lenis.raf(time); requestAnimationFrame(raf); }
     requestAnimationFrame(raf); return () => lenis.destroy();
   }, []);
@@ -624,29 +629,36 @@ export default function Home() {
         {selectedProject && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedProject(null)} className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" />
-            <motion.div layoutId={`image-${selectedProject.id}`} className="relative w-full max-w-4xl h-[80vh] bg-white rounded-3xl overflow-hidden shadow-2xl z-10">
-              <img src={selectedProject.img} alt={selectedProject.title} className="object-cover w-full h-full" />
+            <motion.div layoutId={`image-${selectedProject.id}`} className="relative w-full max-w-4xl h-[70vh] md:h-[80vh] bg-white rounded-3xl overflow-hidden shadow-2xl z-10 flex flex-col">
+              <div className="relative h-2/3 md:h-full">
+                <img src={selectedProject.img} alt={selectedProject.title} className="object-cover w-full h-full" />
+                <div className={`absolute inset-0 ${selectedProject.color} mix-blend-multiply opacity-20`} />
+              </div>
               <button onClick={() => setSelectedProject(null)} className={`absolute top-4 right-4 bg-white text-black rounded-full px-4 py-2 font-bold uppercase tracking-widest text-xs ${theme.hover}`}>Close</button>
-              <div className="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black/80 to-transparent text-white">
-                <h2 className={`text-4xl font-bold ${manrope.className}`}>{selectedProject.title}</h2>
-                <p className="mt-2 text-zinc-300">{selectedProject.desc}</p>
+              <div className="h-1/3 md:absolute md:bottom-0 md:left-0 w-full p-6 md:p-8 bg-white md:bg-gradient-to-t md:from-black/80 md:to-transparent text-black md:text-white flex flex-col justify-center">
+                <h2 className={`text-2xl md:text-4xl font-bold ${manrope.className}`}>{selectedProject.title}</h2>
+                <p className="mt-2 text-zinc-500 md:text-zinc-300 text-sm md:text-base">{selectedProject.desc}</p>
+                <div className="mt-4 flex gap-2">
+                  {selectedProject.tags.slice(0, 3).map((t: string) => <span key={t} className="text-[10px] border border-current px-2 py-1 rounded-full opacity-60">{t}</span>)}
+                </div>
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      <div className="relative z-10 bg-white mb-[50vh] md:mb-[80vh] shadow-[0px_50px_100px_rgba(0,0,0,0.5)]">
-        {/* HERO SECTION with ALIGNED 3D CORE */}
-        <HeroSection theme={theme} setCursorVariant={setCursorVariant} />
+      <div className="relative z-10 bg-white mb-[85vh] md:mb-[80vh] shadow-[0px_50px_100px_rgba(0,0,0,0.5)]">
+        <HeroSection theme={theme} setCursorVariant={setCursorVariant} isMobile={isMobile} />
 
         <InfiniteMarquee />
-        <section id="work" className="relative pt-32 pb-64 bg-zinc-50/50">
-          <div className="max-w-7xl mx-auto px-6 md:px-12 mb-24"><CreativeProjectHeader theme={theme} /></div>
-          {PROJECTS.map((project, i) => { const targetScale = 1 - ((PROJECTS.length - i) * 0.05); return <StackingCard key={i} project={project} index={i} range={[i * 0.25, 1]} targetScale={targetScale} progress={scrollYProgress} setIndex={setActiveProjectIndex} onExpand={setSelectedProject} theme={theme} isMobile={isMobile} setCursorVariant={setCursorVariant} setLog={setLog} /> })}
+        <section id="work" className="relative pt-20 md:pt-32 pb-32 md:pb-64 bg-zinc-50/50">
+          <div className="max-w-7xl mx-auto px-4 md:px-12 mb-16 md:mb-24"><CreativeProjectHeader theme={theme} /></div>
+          <div className="flex flex-col gap-0 md:gap-0">
+            {PROJECTS.map((project, i) => { const targetScale = 1 - ((PROJECTS.length - i) * 0.05); return <StackingCard key={i} project={project} index={i} range={[i * 0.25, 1]} targetScale={targetScale} progress={scrollYProgress} setIndex={setActiveProjectIndex} onExpand={setSelectedProject} theme={theme} isMobile={isMobile} setCursorVariant={setCursorVariant} setLog={setLog} /> })}
+          </div>
         </section>
-        <section className="relative bg-white py-32 border-t border-zinc-100 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-6 md:px-12 mb-16"><RoughNotationGroup show={true}><SplitText className={`text-4xl font-bold tracking-tight mb-6 text-black ${manrope.className}`}>Technical Arsenal</SplitText><p className="text-sm text-zinc-500 uppercase tracking-widest font-bold">Core Competencies (<Blueprint type="circle" color={theme.rough} show={true}>Drag to throw</Blueprint>)</p></RoughNotationGroup></div>
+        <section className="relative bg-white py-20 md:py-32 border-t border-zinc-100 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-6 md:px-12 mb-10 md:mb-16"><RoughNotationGroup show={true}><SplitText className={`text-3xl md:text-4xl font-bold tracking-tight mb-6 text-black ${manrope.className}`}>Technical Arsenal</SplitText><p className="text-xs md:text-sm text-zinc-500 uppercase tracking-widest font-bold">Core Competencies ({isMobile ? "Scroll to view" : <Blueprint type="circle" color={theme.rough} show={true}>Drag to throw</Blueprint>})</p></RoughNotationGroup></div>
           <GravityArsenal theme={theme} />
         </section>
       </div>
