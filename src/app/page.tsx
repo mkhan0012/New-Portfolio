@@ -490,7 +490,9 @@ function CommandCenter({ theme }: { theme: any }) {
 
 function Footer({ theme, onCopy }: { theme: any, onCopy: () => void }) {
   return (
-    <div className="fixed bottom-0 h-[85vh] md:h-[80vh] w-full bg-black text-white z-0 flex flex-col justify-between p-6 md:p-24 pb-20 md:pb-safe" style={{ clipPath: "polygon(0% 0, 100% 0%, 100% 100%, 0 100%)" }}>
+    // FIX: Switched to 'relative' on mobile (static flow) and 'fixed' on PC. 
+    // This stops the background flicker.
+    <div className="relative md:fixed bottom-0 h-auto md:h-[80vh] w-full bg-black text-white z-0 flex flex-col justify-between p-6 md:p-24 pb-20 md:pb-safe">
       <div className="flex flex-col md:flex-row justify-between items-start w-full mt-10 md:mt-0">
         <h2 className={`text-[20vw] md:text-[12vw] leading-[0.8] font-black tracking-tighter ${manrope.className}`}>LET'S<br /><span className={theme.text}>TALK</span></h2>
         <div className="flex md:flex-col gap-6 md:gap-4 text-left md:text-right mt-8 md:mt-0 w-full md:w-auto">
@@ -581,11 +583,10 @@ export default function Home() {
   // --- SMOOTH SCROLL (LENIS) OPTIMIZATION ---
   useEffect(() => {
     const lenis = new Lenis({
-      lerp: 0.1,           // Increased from 0.08 for "snappier" feeling (less floaty/laggy)
-      duration: 1.5,       // Smooth glide duration
-      // smoothTouch: true is DEPRECATED and removed.
-      touchMultiplier: 2,  // Faster response on mobile touch
-      wheelMultiplier: 1,  // Standard speed on mouse wheel
+      lerp: 0.1,
+      duration: 1.5,
+      touchMultiplier: 2,
+      wheelMultiplier: 1,
     });
 
     function raf(time: number) { lenis.raf(time); requestAnimationFrame(raf); }
@@ -647,7 +648,8 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <div className="relative z-10 bg-white mb-[85vh] md:mb-[80vh] shadow-[0px_50px_100px_rgba(0,0,0,0.5)]">
+      {/* FIX: Removed margin on mobile (mb-0) so footer sits below content naturally. */}
+      <div className="relative z-10 bg-white mb-0 md:mb-[80vh] shadow-[0px_50px_100px_rgba(0,0,0,0.5)]">
         <HeroSection theme={theme} setCursorVariant={setCursorVariant} isMobile={isMobile} />
 
         <InfiniteMarquee />
