@@ -215,6 +215,7 @@ const HackerMode = () => {
 const GravityArsenal = ({ theme }: { theme: any }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const elementsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const reqId = useRef<number>(0);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.innerWidth < 768) return;
@@ -222,22 +223,69 @@ const GravityArsenal = ({ theme }: { theme: any }) => {
     const Engine = Matter.Engine, World = Matter.World, Bodies = Matter.Bodies, Mouse = Matter.Mouse, MouseConstraint = Matter.MouseConstraint, Runner = Matter.Runner;
     const engine = Engine.create(); const world = engine.world;
     const width = containerRef.current.clientWidth; const height = 600;
-    const walls = [Bodies.rectangle(width / 2, height + 50, width, 100, { isStatic: true }), Bodies.rectangle(-50, height / 2, 100, height, { isStatic: true }), Bodies.rectangle(width + 50, height / 2, 100, height, { isStatic: true })];
+
+    // Walls
+    const walls = [
+      Bodies.rectangle(width / 2, height + 50, width, 100, { isStatic: true }),
+      Bodies.rectangle(-50, height / 2, 100, height, { isStatic: true }),
+      Bodies.rectangle(width + 50, height / 2, 100, height, { isStatic: true })
+    ];
     World.add(world, walls);
-    const techBodies = TECH_ITEMS.map((_, i) => { const el = elementsRef.current[i]; if (!el) return null; return Bodies.rectangle(Math.random() * (width - 100) + 50, -Math.random() * 500 - 100, el.offsetWidth, el.offsetHeight, { chamfer: { radius: 20 }, restitution: 0.6 }); }).filter(b => b !== null) as Matter.Body[];
+
+    // Bodies
+    const techBodies = TECH_ITEMS.map((_, i) => {
+      const el = elementsRef.current[i];
+      if (!el) return null;
+      // Adjusted restitution and friction for better "throw" feel
+      return Bodies.rectangle(Math.random() * (width - 100) + 50, -Math.random() * 500 - 100, el.offsetWidth, el.offsetHeight, {
+        chamfer: { radius: 20 },
+        restitution: 0.8, // Bouncier
+        frictionAir: 0.005 // Lower friction for better gliding/throwing
+      });
+    }).filter(b => b !== null) as Matter.Body[];
     World.add(world, techBodies);
-    const mouse = Mouse.create(containerRef.current); mouse.element.removeEventListener("mousewheel", (mouse as any).mousewheel); mouse.element.removeEventListener("DOMMouseScroll", (mouse as any).mousewheel);
-    const mouseConstraint = MouseConstraint.create(engine, { mouse: mouse, constraint: { stiffness: 0.2, render: { visible: false } } }); World.add(world, mouseConstraint);
-    const runner = Runner.create(); Runner.run(runner, engine);
-    const updateLoop = () => { techBodies.forEach((body, i) => { const el = elementsRef.current[i]; if (el) el.style.transform = `translate(${body.position.x - el.offsetWidth / 2}px, ${body.position.y - el.offsetHeight / 2}px) rotate(${body.angle}rad)`; }); requestAnimationFrame(updateLoop); }; updateLoop();
-    return () => { Runner.stop(runner); Engine.clear(engine); World.clear(world, false); };
+
+    // Mouse Interaction
+    const mouse = Mouse.create(containerRef.current);
+    mouse.element.removeEventListener("mousewheel", (mouse as any).mousewheel);
+    mouse.element.removeEventListener("DOMMouseScroll", (mouse as any).mousewheel);
+
+    const mouseConstraint = MouseConstraint.create(engine, {
+      mouse: mouse,
+      constraint: {
+        stiffness: 0.9, // Higher stiffness for instant grab response (no lag)
+        damping: 0.1,
+        render: { visible: false }
+      }
+    });
+    World.add(world, mouseConstraint);
+
+    const runner = Runner.create();
+    Runner.run(runner, engine);
+
+    const updateLoop = () => {
+      techBodies.forEach((body, i) => {
+        const el = elementsRef.current[i];
+        if (el) el.style.transform = `translate(${body.position.x - el.offsetWidth / 2}px, ${body.position.y - el.offsetHeight / 2}px) rotate(${body.angle}rad)`;
+      });
+      reqId.current = requestAnimationFrame(updateLoop);
+    };
+    updateLoop();
+
+    return () => {
+      cancelAnimationFrame(reqId.current);
+      Runner.stop(runner);
+      Engine.clear(engine);
+      World.clear(world, false);
+    };
   }, []);
 
   return (
     <div ref={containerRef} className="relative w-full min-h-[400px] md:h-[600px] bg-zinc-50 border-y border-zinc-200 overflow-hidden cursor-grab active:cursor-grabbing flex flex-wrap items-center justify-center gap-3 p-6 md:block touch-pan-y">
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none"><h3 className={`text-[12vw] md:text-[10vw] font-black text-zinc-100 ${manrope.className} uppercase tracking-tighter opacity-60 md:opacity-100`}>Playground</h3></div>
       {TECH_ITEMS.map((item, i) => (
-        <div key={i} ref={(el) => { elementsRef.current[i] = el }} className={`relative md:absolute md:top-0 md:left-0 px-4 py-2 md:px-6 md:py-3 bg-white border md:border-2 border-black rounded-full text-xs md:text-sm font-bold uppercase tracking-widest shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] select-none neon-chip ${theme.hover} transition-transform active:scale-95 md:active:scale-100`}>
+        <div key={i} ref={(el) => { elementsRef.current[i] = el }} className={`relative md:absolute md:top-0 md:left-0 px-4 py-2 md:px-6 md:py-3 bg-white border md:border-2 border-black rounded-full text-xs md:text-sm font-bold uppercase tracking-widest shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] select-none neon-chip ${theme.hover} active:scale-95 md:active:scale-100`}>
+          {/* Removed 'transition-transform' to prevent conflict with Matter.js updates */}
           {item}
         </div>
       ))}
@@ -259,6 +307,8 @@ function InfiniteMarquee() {
 function Preloader({ onComplete, theme }: { onComplete: () => void, theme: any }) {
   const [count, setCount] = useState(0);
   const curtainRef = useRef(null);
+
+  // Fixed useEffect dependency to prevent interval reset loop
   useEffect(() => {
     const interval = setInterval(() => {
       setCount((prev) => {
@@ -266,9 +316,11 @@ function Preloader({ onComplete, theme }: { onComplete: () => void, theme: any }
         return prev + 1;
       });
     }, 15);
-
-    if (count === 100) gsap.to(curtainRef.current, { y: "-100%", duration: 1.2, ease: "power4.inOut", delay: 0.2, onComplete: onComplete });
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (count === 100) gsap.to(curtainRef.current, { y: "-100%", duration: 1.2, ease: "power4.inOut", delay: 0.2, onComplete: onComplete });
   }, [count, onComplete]);
 
   return (<div ref={curtainRef} className={`fixed inset-0 bg-black z-[10000] flex items-end justify-start p-6 md:p-20 ${theme.text}`}><div className="flex flex-col"><span className={`text-[20vw] md:text-[15vw] leading-[0.8] font-black tracking-tighter ${manrope.className}`}>{count}%</span><span className="text-xs uppercase tracking-widest mt-4 opacity-50">System Initializing...</span></div></div>);
@@ -297,8 +349,9 @@ function CustomCursor({ variant }: { variant: string }) {
     if (!cursor.current || !follower.current) return;
     const xTo = gsap.quickTo(cursor.current, "x", { duration: 0.1, ease: "power3.out" });
     const yTo = gsap.quickTo(cursor.current, "y", { duration: 0.1, ease: "power3.out" });
-    const xToFollow = gsap.quickTo(follower.current, "x", { duration: 0.6, ease: "power3.out" });
-    const yToFollow = gsap.quickTo(follower.current, "y", { duration: 0.6, ease: "power3.out" });
+    // Reduced duration from 0.6 to 0.12 for refined, snappy non-laggy movement
+    const xToFollow = gsap.quickTo(follower.current, "x", { duration: 0.12, ease: "power3.out" });
+    const yToFollow = gsap.quickTo(follower.current, "y", { duration: 0.12, ease: "power3.out" });
     const move = (e: MouseEvent) => {
       xTo(e.clientX); yTo(e.clientY);
       xToFollow(e.clientX); yToFollow(e.clientY);
